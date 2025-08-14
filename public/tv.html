@@ -63,6 +63,8 @@
 				<button onclick="changeState('game_playing')" style="margin:2px;padding:4px;font-size:10px;">Game</button>
 				<button onclick="changeState('sports_promo_focus_watchnow')" style="margin:2px;padding:4px;font-size:10px;">Sports</button>
 				<button onclick="changeState('primetime_promo_focus_watchnow')" style="margin:2px;padding:4px;font-size:10px;">Primetime</button>
+				<button onclick="changeState('sports_content')" style="margin:2px;padding:4px;font-size:10px;">Sports Video</button>
+				<button onclick="changeState('primetime_content')" style="margin:2px;padding:4px;font-size:10px;">Primetime Video</button>
 			`;
 			document.body.appendChild(testEl);
 			
@@ -94,29 +96,73 @@
 
         function changeState(newState) {
 			if (figmaLinks[newState]) {
-                // Add loading state for video transitions
-                const loadingEl = document.querySelector('.loading-indicator') || createLoadingIndicator();
-                loadingEl.style.display = 'block';
-                
-                // Preload the next state for smoother video transitions
-                const nextUrl = toEmbedUrl(figmaLinks[newState]);
-                
-                // Handle video content transitions more gracefully
+                // Don't reload iframe for video content - just track state
                 if (newState.includes('content')) {
-                    // For content states (videos), add a brief delay to allow current video to stop
-                    setTimeout(() => {
-                        figmaFrame.src = nextUrl;
-                        currentState = newState;
-                        loadingEl.style.display = 'none';
-                    }, 300);
+                    // For content states, just update the state without reloading
+                    currentState = newState;
+                    console.log('Video content state changed to:', newState);
+                    
+                    // Show content indicator instead of loading
+                    showContentIndicator(newState);
                 } else {
-                    // For promo states, transition immediately
+                    // For promo states, we still need to change frames
+                    const loadingEl = document.querySelector('.loading-indicator') || createLoadingIndicator();
+                    loadingEl.style.display = 'block';
+                    
+                    const nextUrl = toEmbedUrl(figmaLinks[newState]);
                     figmaFrame.src = nextUrl;
                     currentState = newState;
-                    loadingEl.style.display = 'none';
+                    
+                    // Hide loading after iframe loads
+                    setTimeout(() => {
+                        loadingEl.style.display = 'none';
+                    }, 500);
                 }
 			}
 		}
+        
+        function showContentIndicator(contentType) {
+            // Remove existing content indicator
+            const existing = document.querySelector('.content-indicator');
+            if (existing) existing.remove();
+            
+            // Create new content indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'content-indicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.9);
+                color: white;
+                padding: 30px 60px;
+                border-radius: 12px;
+                font-size: 24px;
+                z-index: 10000;
+                text-align: center;
+                font-weight: bold;
+            `;
+            
+            if (contentType === 'sports_content') {
+                indicator.innerHTML = '🏈 SPORTS CONTENT<br><span style="font-size:16px;opacity:0.8;">Video continues playing...</span>';
+            } else if (contentType === 'primetime_content') {
+                indicator.innerHTML = '📺 PRIMETIME CONTENT<br><span style="font-size:16px;opacity:0.8;">Video continues playing...</span>';
+            }
+            
+            document.body.appendChild(indicator);
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.style.opacity = '0';
+                    indicator.style.transition = 'opacity 1s';
+                    setTimeout(() => {
+                        if (indicator.parentNode) indicator.remove();
+                    }, 1000);
+                }
+            }, 3000);
+        }
         
         function createLoadingIndicator() {
             const loadingEl = document.createElement('div');
@@ -192,6 +238,13 @@
 				case 'primetime_promo_focus_dismiss':
 					if (key === 'up' || key === 'left') changeState('primetime_promo_focus_watchnow');
 					else if (key === 'ok') changeState('game_playing');
+					break;
+				case 'sports_content':
+				case 'primetime_content':
+					// From content states, any key returns to game playing
+					if (key === 'ok' || key === 'up' || key === 'down' || key === 'left' || key === 'right') {
+						changeState('game_playing');
+					}
 					break;
 			}
 		});
