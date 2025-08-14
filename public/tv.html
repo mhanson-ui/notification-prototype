@@ -58,26 +58,33 @@
 			countdownEl.style.fontSize = '14px';
 			countdownEl.style.borderRadius = '4px';
 			countdownEl.style.zIndex = '9999';
-			countdownEl.innerText = 'Promo in 10s';
+			countdownEl.innerText = 'Video loading...';
+			countdownEl.style.display = 'none';
 			document.body.appendChild(countdownEl);
 			
-			// Start countdown
-			let countdown = 10;
-			const countdownInterval = setInterval(() => {
-				countdown--;
-				if (countdown > 0) {
-					countdownEl.innerText = `Promo in ${countdown}s`;
-				} else {
-					countdownEl.innerText = 'Promo appearing...';
-					countdownEl.style.background = 'rgba(255,0,0,0.8)';
-					clearInterval(countdownInterval);
-					
-					// Hide countdown after promo appears
-					setTimeout(() => {
-						countdownEl.style.display = 'none';
-					}, 3000);
-				}
-			}, 1000);
+			// Function to start countdown after video loads
+			function startPromoCountdown() {
+				countdownEl.style.display = 'block';
+				countdownEl.innerText = 'Promo in 10s';
+				countdownEl.style.background = 'rgba(255,165,0,0.8)';
+				
+				let countdown = 10;
+				const countdownInterval = setInterval(() => {
+					countdown--;
+					if (countdown > 0) {
+						countdownEl.innerText = `Promo in ${countdown}s`;
+					} else {
+						countdownEl.innerText = 'Promo appearing...';
+						countdownEl.style.background = 'rgba(255,0,0,0.8)';
+						clearInterval(countdownInterval);
+						
+						// Hide countdown after promo appears
+						setTimeout(() => {
+							countdownEl.style.display = 'none';
+						}, 3000);
+					}
+				}, 1000);
+			}
 			
 			// Add frame testing interface
 			const testEl = document.createElement('div');
@@ -238,6 +245,15 @@
             
             // Log state changes for debugging
             console.log('State changed to:', currentState);
+            
+            // Start promo countdown only after the initial game_playing frame loads
+            if (currentState === 'game_playing') {
+                console.log('Game frame loaded, starting promo countdown...');
+                // Small delay to ensure video is fully loaded
+                setTimeout(() => {
+                    startPromoCountdown();
+                }, 1000);
+            }
         });
         
         // Add error handling for iframe loading issues
