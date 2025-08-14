@@ -47,6 +47,25 @@
 			videoOptEl.innerText = 'video optimized';
 			document.body.appendChild(videoOptEl);
 			
+			// Add frame testing interface
+			const testEl = document.createElement('div');
+			testEl.style.position = 'fixed';
+			testEl.style.top = '8px';
+			testEl.style.left = '8px';
+			testEl.style.padding = '8px';
+			testEl.style.background = 'rgba(0,0,0,0.8)';
+			testEl.style.color = '#fff';
+			testEl.style.fontSize = '11px';
+			testEl.style.borderRadius = '4px';
+			testEl.style.zIndex = '9999';
+			testEl.innerHTML = `
+				<div>Test Frames:</div>
+				<button onclick="changeState('game_playing')" style="margin:2px;padding:4px;font-size:10px;">Game</button>
+				<button onclick="changeState('sports_promo_focus_watchnow')" style="margin:2px;padding:4px;font-size:10px;">Sports</button>
+				<button onclick="changeState('primetime_promo_focus_watchnow')" style="margin:2px;padding:4px;font-size:10px;">Primetime</button>
+			`;
+			document.body.appendChild(testEl);
+			
 			socket.on('connect', () => statusEl.innerText = 'connected');
 			socket.on('disconnect', () => statusEl.innerText = 'disconnected');
 		})();
@@ -121,7 +140,12 @@
         }
 
         // Initialize the iframe with the initial state
+        console.log('Initializing with game_playing state...');
         changeState('game_playing');
+        
+        // Debug: Log all available states
+        console.log('Available states:', Object.keys(figmaLinks));
+        console.log('Current state:', currentState);
         
         // Add iframe load event handling for video content
         figmaFrame.addEventListener('load', function() {
