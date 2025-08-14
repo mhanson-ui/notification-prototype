@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 // ===================================================================
 // ## MODERATOR CONFIGURATION ##
 // Change this value to set how many seconds to wait before the promo appears.
-const TRIGGER_DELAY_SECONDS = process.env.TRIGGER_DELAY_SECONDS ? Number(process.env.TRIGGER_DELAY_SECONDS) : 15;
+const TRIGGER_DELAY_SECONDS = process.env.TRIGGER_DELAY_SECONDS ? Number(process.env.TRIGGER_DELAY_SECONDS) : 10;
 // ===================================================================
 
 app.use(express.static(path.join(__dirname, 'public'), {

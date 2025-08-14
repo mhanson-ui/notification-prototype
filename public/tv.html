@@ -47,6 +47,38 @@
 			videoOptEl.innerText = 'video optimized';
 			document.body.appendChild(videoOptEl);
 			
+			// Add promo countdown indicator
+			const countdownEl = document.createElement('div');
+			countdownEl.style.position = 'fixed';
+			countdownEl.style.top = '8px';
+			countdownEl.style.right = '8px';
+			countdownEl.style.padding = '8px';
+			countdownEl.style.background = 'rgba(255,165,0,0.8)';
+			countdownEl.style.color = '#fff';
+			countdownEl.style.fontSize = '14px';
+			countdownEl.style.borderRadius = '4px';
+			countdownEl.style.zIndex = '9999';
+			countdownEl.innerText = 'Promo in 10s';
+			document.body.appendChild(countdownEl);
+			
+			// Start countdown
+			let countdown = 10;
+			const countdownInterval = setInterval(() => {
+				countdown--;
+				if (countdown > 0) {
+					countdownEl.innerText = `Promo in ${countdown}s`;
+				} else {
+					countdownEl.innerText = 'Promo appearing...';
+					countdownEl.style.background = 'rgba(255,0,0,0.8)';
+					clearInterval(countdownInterval);
+					
+					// Hide countdown after promo appears
+					setTimeout(() => {
+						countdownEl.style.display = 'none';
+					}, 3000);
+				}
+			}, 1000);
+			
 			// Add frame testing interface
 			const testEl = document.createElement('div');
 			testEl.style.position = 'fixed';
