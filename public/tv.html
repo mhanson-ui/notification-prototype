@@ -104,6 +104,11 @@
 				<button onclick="changeState('primetime_promo_focus_watchnow')" style="margin:2px;padding:4px;font-size:10px;">Primetime</button>
 				<button onclick="changeState('sports_content')" style="margin:2px;padding:4px;font-size:10px;">Sports Video</button>
 				<button onclick="changeState('primetime_content')" style="margin:2px;padding:4px;font-size:10px;">Primetime Video</button>
+				<hr style="margin:4px 0;border-color:#666;">
+				<div>Test Promos:</div>
+				<button onclick="fetch('/test-sports')" style="margin:2px;padding:4px;font-size:10px;background:#4CAF50;">Test Sports</button>
+				<button onclick="fetch('/test-entertainment')" style="margin:2px;padding:4px;font-size:10px;background:#FF9800;">Test Entertainment</button>
+				<button onclick="fetch('/reset-game')" style="margin:2px;padding:4px;font-size:10px;background:#f44336;">Reset</button>
 			`;
 			document.body.appendChild(testEl);
 			
@@ -284,6 +289,12 @@
 			} else {
 				console.log('Not in game_playing state, current state:', currentState);
 			}
+		});
+		
+		// Handle reset to game playing
+		socket.on('reset-to-game', () => {
+			console.log('Resetting to game playing state');
+			changeState('game_playing');
 		});
 
 		socket.on('tv-command', (data) => {

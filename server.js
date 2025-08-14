@@ -36,9 +36,29 @@ app.get('/test-sports', (req, res) => {
     res.json({ message: 'Sports promo triggered' });
 });
 
+app.get('/test-entertainment', (req, res) => {
+    io.emit('show-promo', { promoType: 'primetime_promo' });
+    res.json({ message: 'Entertainment promo triggered' });
+});
+
+// Alternative naming for clarity
 app.get('/test-primetime', (req, res) => {
     io.emit('show-promo', { promoType: 'primetime_promo' });
     res.json({ message: 'Primetime promo triggered' });
+});
+
+// Reset to game playing state
+app.get('/reset-game', (req, res) => {
+    io.emit('reset-to-game');
+    res.json({ message: 'Reset to game playing' });
+});
+
+// Get current promo delay setting
+app.get('/promo-delay', (req, res) => {
+    res.json({ 
+        currentDelay: TRIGGER_DELAY_SECONDS,
+        message: `Promo appears after ${TRIGGER_DELAY_SECONDS} seconds` 
+    });
 });
 
 function getContextualPromoType() {
