@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Fubo TV Screen</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+		iframe { width: 100%; height: 100%; border: none; }
+	</style>
+</head>
+<body>
+    <iframe id="figma-embed" src=""></iframe>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		const socket = io();
+		const figmaFrame = document.getElementById('figma-embed');
+
+        const figmaLinks = {
+            'game_playing': "YOUR_GAME_PLAYING_LINK_HERE",
+            'sports_promo_focus_watchnow': "YOUR_SPORTS_PROMO_FOCUS_WATCHNOW_LINK_HERE",
+            'sports_promo_focus_dismiss': "YOUR_SPORTS_PROMO_FOCUS_DISMISS_LINK_HERE",
+            'primetime_promo_focus_watchnow': "YOUR_PRIMETIME_PROMO_FOCUS_WATCHNOW_LINK_HERE",
+            'primetime_promo_focus_dismiss': "YOUR_PRIMETIME_PROMO_FOCUS_DISMISS_LINK_HERE",
+            'sports_content': "YOUR_SPORTS_CONTENT_LINK_HERE",
+            'primetime_content': "YOUR_PRIMETIME_CONTENT_LINK_HERE"
+        };
+
+        function toEmbedUrl(url) {
+            if (!url) return '';
+            // If it's already an embed URL, keep it; else wrap inside Figma embed host
+            if (url.includes('embed.figma.com')) return url;
+            const encoded = encodeURIComponent(url);
+            return `https://www.figma.com/embed?embed_host=notion&url=${encoded}`;
+        }
+
+		let currentState = 'game_playing';
+
+        function changeState(newState) {
+			if (figmaLinks[newState]) {
+                figmaFrame.src = toEmbedUrl(figmaLinks[newState]);
+				currentState = newState;
+			}
+		}
+
+        // Initialize the iframe with the initial state
+        changeState('game_playing');
+
+		socket.on('show-promo', (data) => {
+			if (currentState === 'game_playing') {
+				changeState(data.promoType + '_focus_watchnow');
+			}
+		});
+
+		socket.on('tv-command', (data) => {
+			const key = data.key;
+			switch (currentState) {
+				case 'sports_promo_focus_watchnow':
+					if (key === 'down') changeState('sports_promo_focus_dismiss');
+					else if (key === 'ok') changeState('sports_content');
+					break;
+				case 'sports_promo_focus_dismiss':
+					if (key === 'up') changeState('sports_promo_focus_watchnow');
+					else if (key === 'ok') changeState('game_playing');
+					break;
+				case 'primetime_promo_focus_watchnow':
+					if (key === 'down') changeState('primetime_promo_focus_dismiss');
+					else if (key === 'ok') changeState('primetime_content');
+					break;
+				case 'primetime_promo_focus_dismiss':
+					if (key === 'up') changeState('primetime_promo_focus_watchnow');
+					else if (key === 'ok') changeState('game_playing');
+					break;
+			}
+		});
+	</script>
+</body>
+</html>

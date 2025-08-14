@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Remote</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<style>
+		body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;touch-action:manipulation;}
+		.d-pad{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;width:180px;height:180px;}
+		.d-pad button{font-size:24px;border:1px solid #ccc;background:#f0f0f0;cursor:pointer;user-select:none;}
+		.d-pad button:active{background:#bbb;}
+		#ok-btn{grid-column:2;grid-row:2;border-radius:50%;}
+		#up-btn{grid-column:2;grid-row:1;}
+		#down-btn{grid-column:2;grid-row:3;}
+		#left-btn{grid-column:1;grid-row:2;}
+		#right-btn{grid-column:3;grid-row:2;}
+	</style>
+</head>
+<body>
+	<div class="d-pad">
+		<button id="up-btn" onclick="sendInput('up')">▲</button>
+		<button id="left-btn" onclick="sendInput('left')">◀</button>
+		<button id="ok-btn" onclick="sendInput('ok')">OK</button>
+		<button id="right-btn" onclick="sendInput('right')">▶</button>
+		<button id="down-btn" onclick="sendInput('down')">▼</button>
+	</div>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		const socket = io();
+		function sendInput(key){
+			socket.emit('remote-input', { key: key });
+		}
+	</script>
+</body>
+</html>
