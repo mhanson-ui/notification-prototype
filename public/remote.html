@@ -17,18 +17,49 @@
 </head>
 <body>
 	<div class="d-pad">
-		<button id="up-btn" onclick="sendInput('up')">▲</button>
-		<button id="left-btn" onclick="sendInput('left')">◀</button>
-		<button id="ok-btn" onclick="sendInput('ok')">OK</button>
-		<button id="right-btn" onclick="sendInput('right')">▶</button>
-		<button id="down-btn" onclick="sendInput('down')">▼</button>
+		<button id="up-btn">▲</button>
+		<button id="left-btn">◀</button>
+		<button id="ok-btn">OK</button>
+		<button id="right-btn">▶</button>
+		<button id="down-btn">▼</button>
 	</div>
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
-		const socket = io();
+		const socket = io({ transports: ['websocket'], upgrade: false });
+		const statusEl = document.createElement('div');
+		statusEl.style.position = 'fixed';
+		statusEl.style.bottom = '8px';
+		statusEl.style.right = '8px';
+		statusEl.style.padding = '6px 8px';
+		statusEl.style.background = 'rgba(0,0,0,0.6)';
+		statusEl.style.color = '#fff';
+		statusEl.style.fontSize = '12px';
+		statusEl.style.borderRadius = '4px';
+		statusEl.innerText = 'connecting...';
+		document.body.appendChild(statusEl);
+
+		socket.on('connect', () => statusEl.innerText = 'connected');
+		socket.on('disconnect', () => statusEl.innerText = 'disconnected');
+
 		function sendInput(key){
-			socket.emit('remote-input', { key: key });
+			socket.emit('remote-input', { key });
 		}
+
+		function wireButton(id, key){
+			const el = document.getElementById(id);
+			['click','touchstart'].forEach(evt => el.addEventListener(evt, (e) => {
+				// Prevent double firing and page zoom
+				e.preventDefault();
+				e.stopPropagation();
+				sendInput(key);
+			}, { passive: false }));
+		}
+
+		wireButton('up-btn','up');
+		wireButton('left-btn','left');
+		wireButton('ok-btn','ok');
+		wireButton('right-btn','right');
+		wireButton('down-btn','down');
 	</script>
 </body>
 </html>

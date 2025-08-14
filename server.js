@@ -14,11 +14,31 @@ const PORT = process.env.PORT || 5000;
 const TRIGGER_DELAY_SECONDS = process.env.TRIGGER_DELAY_SECONDS ? Number(process.env.TRIGGER_DELAY_SECONDS) : 15;
 // ===================================================================
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1h',
+    etag: true,
+    lastModified: true
+}));
 
 // Serve TV screen by default at root
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tv.html'));
+});
+
+// Simple health check for connectivity tests
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
+// Test routes to trigger specific promo types immediately
+app.get('/test-sports', (req, res) => {
+    io.emit('show-promo', { promoType: 'sports_promo' });
+    res.json({ message: 'Sports promo triggered' });
+});
+
+app.get('/test-primetime', (req, res) => {
+    io.emit('show-promo', { promoType: 'primetime_promo' });
+    res.json({ message: 'Primetime promo triggered' });
 });
 
 function getContextualPromoType() {
@@ -49,4 +69,4 @@ io.on('connection', (socket) => {
 	});
 });
 
-server.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`Server is listening on port ${PORT}`));
