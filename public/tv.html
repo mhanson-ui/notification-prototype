@@ -95,6 +95,9 @@
 		let currentState = 'game_playing';
 
         function changeState(newState) {
+			console.log('changeState called with:', newState);
+			console.log('Available states:', Object.keys(figmaLinks));
+			
 			if (figmaLinks[newState]) {
                 // Don't reload iframe for video content - just track state
                 if (newState.includes('content')) {
@@ -215,8 +218,23 @@
         });
 
 		socket.on('show-promo', (data) => {
+			console.log('Received show-promo event:', data);
 			if (currentState === 'game_playing') {
-				changeState(data.promoType + '_focus_watchnow');
+				// Map the promo type to the correct state
+				let targetState;
+				if (data.promoType === 'sports_promo') {
+					targetState = 'sports_promo_focus_watchnow';
+				} else if (data.promoType === 'primetime_promo') {
+					targetState = 'primetime_promo_focus_watchnow';
+				} else {
+					console.error('Unknown promo type:', data.promoType);
+					return;
+				}
+				
+				console.log('Changing to state:', targetState);
+				changeState(targetState);
+			} else {
+				console.log('Not in game_playing state, current state:', currentState);
 			}
 		});
 
