@@ -122,7 +122,8 @@
 			<div class="loading-instructions">
 				<strong>How to use:</strong><br>
 				• Watch the content automatically<br>
-				• When you see an action prompt, press <strong>ENTER</strong> to dismiss<br>
+				• When you see an action prompt, press <strong>ENTER</strong> to continue<br>
+				• The prototype will guide you through the experience<br>
 				• Sit back and enjoy the show!
 			</div>
 			<div class="loading-progress">
@@ -157,7 +158,6 @@
 		};
 
 		let currentState = 'game_playing';
-		let promoCountdown = null;
 
 		// Convert Figma URLs to embed URLs
 		function toEmbedUrl(url) {
@@ -221,75 +221,25 @@
 			figmaFrame.src = toEmbedUrl(figmaLinks['game_playing']);
 			currentState = 'game_playing';
 			
-			// Start promo countdown after video loads
-			figmaFrame.onload = () => {
-				console.log('Main iframe loaded, starting promo countdown...');
-				startPromoCountdown();
-			};
-			
-			// Fallback: if iframe doesn't load quickly, still start countdown
-			setTimeout(() => {
-				if (!promoCountdown) {
-					console.log('Fallback: starting promo countdown...');
-					startPromoCountdown();
-				}
-			}, 3000);
+			// Let Figma prototype handle its own flow - no forced countdown
+			console.log('Main iframe loaded, letting Figma prototype control the flow...');
 		}
 
-		// Start promo countdown
-		function startPromoCountdown() {
-			let countdown = 10;
-			promoCountdown = setInterval(() => {
-				countdown--;
-				if (countdown <= 0) {
-					clearInterval(promoCountdown);
-					showPromo();
-				}
-			}, 1000);
-		}
-
-		// Show appropriate promo based on time
-		function showPromo() {
-			const now = new Date();
-			const hour = now.getHours();
-			
-			let targetState;
-			if (hour >= 16) { // 4 PM or later
-				targetState = 'primetime_promo_focus_watchnow';
-			} else {
-				targetState = 'sports_promo_focus_watchnow';
-			}
-			
-			changeState(targetState);
-		}
-
-		// Change to different state
+		// We no longer control state changes - Figma prototype handles its own flow
+		// This function is kept for testing purposes only
 		function changeState(newState) {
 			if (figmaLinks[newState]) {
 				currentState = newState;
 				figmaFrame.src = toEmbedUrl(figmaLinks[newState]);
-				
-				// Show enter hint for dismissable states
-				if (newState.includes('dismiss')) {
-					enterHint.classList.add('show');
-				} else {
-					enterHint.classList.remove('show');
-				}
 			}
 		}
 
-		// Handle Enter key for dismissal
+		// Handle Enter key for dismissal - only when Figma shows action prompt
 		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' && currentState.includes('dismiss')) {
-				// Return to game playing
-				changeState('game_playing');
-				enterHint.classList.remove('show');
-				
-				// Restart promo countdown
-				if (promoCountdown) clearInterval(promoCountdown);
-				setTimeout(() => {
-					startPromoCountdown();
-				}, 2000);
+			if (e.key === 'Enter') {
+				// Let Figma prototype handle the Enter key action
+				// We're just providing the input method, not controlling the flow
+				console.log('Enter key pressed - Figma prototype will handle the action');
 			}
 		});
 
