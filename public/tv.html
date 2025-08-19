@@ -78,6 +78,21 @@
 			font-size: 16px;
 			opacity: 0.7;
 		}
+
+		.loading-cta {
+			margin-top: 24px;
+			padding: 12px 20px;
+			background: #00d084;
+			color: #00130d;
+			border: none;
+			border-radius: 6px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			display: none;
+		}
+
+		.loading-cta:active { transform: scale(0.99); }
 		
 		.tv-screen {
 			position: fixed;
@@ -121,6 +136,7 @@
 			<div class="loading-subtitle">Loading your TV experience...</div>
 			<div class="loading-instructions">
 				<strong>How to use:</strong><br>
+				• Click "Begin" to start<br>
 				• Watch the content automatically<br>
 				• When you see an action prompt, press <strong>ENTER</strong> to continue<br>
 				• The prototype will guide you through the experience<br>
@@ -130,6 +146,7 @@
 				<div id="loading-bar" class="loading-bar"></div>
 			</div>
 			<div id="loading-status" class="loading-status">Initializing...</div>
+			<button id="begin-btn" class="loading-cta">Click to begin</button>
 		</div>
 	</div>
 	
@@ -181,13 +198,13 @@
 			// Preload states sequentially to avoid overwhelming WebGL contexts
 			async function preloadNext(index) {
 				if (index >= states.length) {
-					// All content preloaded, show TV screen
-					loadingStatus.textContent = 'All content ready! Starting TV experience...';
-					setTimeout(() => {
-						showTVScreen();
-						// Clean up preload iframes
-						preloadContainer.remove();
-					}, 1000);
+					// All content preloaded, reveal CTA to start
+					loadingStatus.textContent = 'All content ready!';
+					const beginBtn = document.getElementById('begin-btn');
+					beginBtn.style.display = 'inline-block';
+					beginBtn.disabled = false;
+					// Clean up preload iframes now that cache is warm
+					preloadContainer.remove();
 					return;
 				}
 				
@@ -223,17 +240,28 @@
 			preloadNext(0);
 		}
 
-		// Show TV screen and start experience
+		// Show TV screen and start experience after user click; keep overlay until iframe signals ready
 		function showTVScreen() {
-			loadingScreen.style.display = 'none';
+			// Keep the loading overlay visible while the main iframe is initializing
 			tvScreen.style.display = 'block';
+			loadingStatus.textContent = 'Starting...';
 			
-			// Since content is preloaded, this should load instantly
 			figmaFrame.src = toEmbedUrl(figmaLinks['game_playing']);
 			currentState = 'game_playing';
 			
-			// Let Figma prototype handle its own flow - no forced countdown
-			console.log('Main iframe loaded, letting Figma prototype control the flow...');
+			let loaded = false;
+			const readyTimeout = setTimeout(() => {
+				if (!loaded) {
+					loadingStatus.textContent = 'Almost there...';
+				}
+			}, 1500);
+			
+			figmaFrame.onload = () => {
+				loaded = true;
+				clearTimeout(readyTimeout);
+				loadingScreen.style.display = 'none';
+				console.log('Main iframe loaded, letting Figma prototype control the flow...');
+			};
 		}
 
 		// We no longer control state changes - Figma prototype handles its own flow
@@ -265,10 +293,14 @@
 
 		socket.on('reset-to-game', () => {
 			changeState('game_playing');
-			if (promoCountdown) clearInterval(promoCountdown);
-			setTimeout(() => {
-				startPromoCountdown();
-			}, 2000);
+		});
+
+		// Wire CTA to start once preloaded
+		const beginBtn = document.getElementById('begin-btn');
+		beginBtn.addEventListener('click', () => {
+			beginBtn.disabled = true;
+			beginBtn.textContent = 'Loading...';
+			showTVScreen();
 		});
 
 		// Start preloading content
