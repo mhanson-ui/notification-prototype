@@ -137,9 +137,12 @@
         
         // Start loading the Figma content immediately in the single iframe
         ribbonAutoDismissFrame.src = toEmbedUrl(ribbonAutoDismissUrl);
+        // When the iframe is fully loaded, wait for render, then enable the CTA
         ribbonAutoDismissFrame.onload = () => {
-            beginBtn.disabled = false;
-            loadingStatus.textContent = 'Ready to start.';
+            setTimeout(() => {
+                beginBtn.disabled = false;
+                loadingStatus.textContent = 'Ready to start.';
+            }, 1500); // Artificial delay for Figma's internal rendering
         };
 
         // On click, hide loading and fade in the iframe

@@ -141,10 +141,12 @@
         // 1. Start loading the Figma content immediately in the single iframe
         toastUserDismissFrame.src = toEmbedUrl(toastUserDismissUrl);
 
-        // 2. When the iframe is fully loaded, enable the CTA
+        // 2. When the iframe is fully loaded, wait a moment for it to render, then enable the CTA
         toastUserDismissFrame.onload = () => {
-            beginBtn.disabled = false;
-            loadingStatus.textContent = 'Ready to start. Press Enter to use the CTA once visible.';
+            setTimeout(() => {
+                beginBtn.disabled = false;
+                loadingStatus.textContent = 'Ready to start. Press Enter to use the CTA once visible.';
+            }, 1500); // Artificial delay to ensure Figma's internal content is fully rendered
         };
 
         // 3. On click, hide loading and fade in the iframe
