@@ -105,6 +105,7 @@
             id="ribbon-auto-dismiss-frame" 
             class="ribbon-auto-dismiss-frame"
             src=""
+            tabindex="0"
             allowfullscreen>
         </iframe>
     </div>
@@ -155,6 +156,9 @@
                 clearInterval(dotTimer);
                 loading.classList.add('hidden');
                 preloadContainer.remove();
+                setTimeout(() => {
+                    try { ribbonAutoDismissFrame.focus(); ribbonAutoDismissFrame.contentWindow && ribbonAutoDismissFrame.contentWindow.focus(); } catch (e) {}
+                }, 0);
             };
         });
         

@@ -105,6 +105,7 @@
             id="toast-user-dismiss-frame" 
             class="toast-user-dismiss-frame"
             src=""
+            tabindex="0"
             allowfullscreen>
         </iframe>
     </div>
@@ -158,6 +159,10 @@
                 loading.classList.add('hidden');
                 // Cleanup hidden preload iframe to free resources
                 preloadContainer.remove();
+                // Ensure iframe is focused for immediate Enter key support
+                setTimeout(() => {
+                    try { toastUserDismissFrame.focus(); toastUserDismissFrame.contentWindow && toastUserDismissFrame.contentWindow.focus(); } catch (e) {}
+                }, 0);
             };
         });
 

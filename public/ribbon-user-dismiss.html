@@ -105,6 +105,7 @@
             id="ribbon-user-dismiss-frame" 
             class="ribbon-user-dismiss-frame"
             src=""
+            tabindex="0"
             allowfullscreen>
         </iframe>
     </div>
@@ -155,6 +156,9 @@
                 clearInterval(dotTimer);
                 loading.classList.add('hidden');
                 preloadContainer.remove();
+                setTimeout(() => {
+                    try { ribbonUserDismissFrame.focus(); ribbonUserDismissFrame.contentWindow && ribbonUserDismissFrame.contentWindow.focus(); } catch (e) {}
+                }, 0);
             };
         });
         

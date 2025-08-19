@@ -105,6 +105,7 @@
             id="toast-auto-dismiss-frame" 
             class="toast-auto-dismiss-frame"
             src=""
+            tabindex="0"
             allowfullscreen>
         </iframe>
     </div>
@@ -155,6 +156,9 @@
                 clearInterval(dotTimer);
                 loading.classList.add('hidden');
                 preloadContainer.remove();
+                setTimeout(() => {
+                    try { toastAutoDismissFrame.focus(); toastAutoDismissFrame.contentWindow && toastAutoDismissFrame.contentWindow.focus(); } catch (e) {}
+                }, 0);
             };
         });
         

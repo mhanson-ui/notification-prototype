@@ -166,7 +166,7 @@
 	
 	<!-- TV Screen -->
 	<div id="tv-screen" class="tv-screen">
-		<iframe id="figma-embed" src=""></iframe>
+		<iframe id="figma-embed" src="" tabindex="0"></iframe>
 		<div id="enter-hint" class="enter-hint">Press ENTER to dismiss</div>
 	</div>
 
@@ -281,6 +281,10 @@
 				loaded = true;
 				clearTimeout(readyTimeout);
 				loadingScreen.style.display = 'none';
+				// Ensure iframe receives keyboard focus so Enter works without extra click
+				setTimeout(() => {
+					try { figmaFrame.focus(); figmaFrame.contentWindow && figmaFrame.contentWindow.focus(); } catch (e) {}
+				}, 0);
 				setPhase('playing');
 				console.log('Main iframe loaded, letting Figma prototype control the flow...');
 			};
