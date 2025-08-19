@@ -61,6 +61,23 @@ app.get('/promo-delay', (req, res) => {
     });
 });
 
+// Railway deployment routes - direct access to specific Figma states
+app.get('/toast-user-dismiss', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'toast-user-dismiss.html'));
+});
+
+app.get('/toast-auto-dismiss', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'toast-auto-dismiss.html'));
+});
+
+app.get('/ribbon-user-dismiss', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'ribbon-user-dismiss.html'));
+});
+
+app.get('/ribbon-auto-dismiss', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'ribbon-auto-dismiss.html'));
+});
+
 function getContextualPromoType() {
 	const location = 'United States';
 	// Current context: Wednesday, August 13, 2025 at 4:52 PM EDT

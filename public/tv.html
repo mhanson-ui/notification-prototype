@@ -168,7 +168,7 @@
 			return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=1&url=${encoded}`;
 		}
 
-		// Preload all Figma content
+		// Preload all Figma content for zero latency - sequential to avoid WebGL context issues
 		async function preloadContent() {
 			const states = Object.keys(figmaLinks);
 			let loadedCount = 0;
@@ -178,38 +178,49 @@
 			preloadContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
 			document.body.appendChild(preloadContainer);
 			
-			// Preload each state
-			for (const state of states) {
+			// Preload states sequentially to avoid overwhelming WebGL contexts
+			async function preloadNext(index) {
+				if (index >= states.length) {
+					// All content preloaded, show TV screen
+					loadingStatus.textContent = 'All content ready! Starting TV experience...';
+					setTimeout(() => {
+						showTVScreen();
+						// Clean up preload iframes
+						preloadContainer.remove();
+					}, 1000);
+					return;
+				}
+				
+				const state = states[index];
 				loadingStatus.textContent = `Preloading ${state.replace(/_/g, ' ')}...`;
-				loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
+				loadingBar.style.width = `${(index / states.length) * 100}%`;
 				
 				// Create hidden iframe to preload content
 				const preloadFrame = document.createElement('iframe');
 				preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
 				preloadFrame.src = toEmbedUrl(figmaLinks[state]);
 				
-				// Wait for iframe to fully load
+				// Wait for iframe to load, then move to next
 				preloadFrame.onload = () => {
-					// Additional wait to ensure Figma content is fully rendered
+					// Wait for Figma to render, then preload next state
 					setTimeout(() => {
 						loadedCount++;
 						loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
 						loadingStatus.textContent = `Preloaded ${loadedCount}/${states.length} states...`;
 						
-						if (loadedCount === states.length) {
-							// All content preloaded, show TV screen
-							loadingStatus.textContent = 'All content ready! Starting TV experience...';
-							setTimeout(() => {
-								showTVScreen();
-								// Clean up preload iframes
-								preloadContainer.remove();
-							}, 1000);
-						}
-					}, 2000); // Wait 2 seconds for Figma to fully render
+						// Remove this iframe to free up WebGL context
+						preloadFrame.remove();
+						
+						// Preload next state
+						preloadNext(index + 1);
+					}, 1500); // Reduced wait time
 				};
 				
 				preloadContainer.appendChild(preloadFrame);
 			}
+			
+			// Start sequential preloading
+			preloadNext(0);
 		}
 
 		// Show TV screen and start experience
