@@ -79,6 +79,12 @@
 			opacity: 0.7;
 		}
 
+		.step-status {
+			margin-top: 8px;
+			font-size: 14px;
+			opacity: 0.85;
+		}
+
 		.loading-cta {
 			margin-top: 24px;
 			padding: 12px 20px;
@@ -153,6 +159,7 @@
 				<div id="loading-bar" class="loading-bar"></div>
 			</div>
 			<div id="loading-status" class="loading-status">Initializing...</div>
+			<div id="step-status" class="step-status">Step 1/3: Preloading…</div>
 			<button id="begin-btn" class="loading-cta">Click to begin</button>
 		</div>
 	</div>
@@ -173,6 +180,13 @@
 		const loadingStatus = document.getElementById('loading-status');
 		const enterHint = document.getElementById('enter-hint');
 		const beginBtn = document.getElementById('begin-btn');
+		const stepStatus = document.getElementById('step-status');
+		function setPhase(phase) {
+			if (phase === 'preloading') stepStatus.textContent = 'Step 1/3: Preloading…';
+			if (phase === 'ready') stepStatus.textContent = 'Step 2/3: Ready – click Begin to start';
+			if (phase === 'starting') stepStatus.textContent = 'Step 3/3: Starting…';
+			if (phase === 'playing') stepStatus.textContent = 'Playing';
+		}
 
 		// Figma prototype links
 		const figmaLinks = {
@@ -209,6 +223,7 @@
 					// All content preloaded, enable CTA
 					loadingStatus.textContent = 'All content ready! Click begin to start';
 					beginBtn.disabled = false;
+					setPhase('ready');
 					// Clean up preload iframes now that cache is warm
 					preloadContainer.remove();
 					return;
@@ -266,6 +281,7 @@
 				loaded = true;
 				clearTimeout(readyTimeout);
 				loadingScreen.style.display = 'none';
+				setPhase('playing');
 				console.log('Main iframe loaded, letting Figma prototype control the flow...');
 			};
 		}
@@ -307,11 +323,13 @@
 		beginBtn.addEventListener('click', () => {
 			beginBtn.disabled = true;
 			beginBtn.textContent = 'Loading...';
+			setPhase('starting');
 			showTVScreen();
 		});
 
 		// Start preloading content
 		console.log('Starting content preload...');
+		setPhase('preloading');
 		preloadContent();
 	</script>
 </body>
