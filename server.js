@@ -79,14 +79,8 @@ function getContextualPromoType() {
 
 io.on('connection', (socket) => {
 	console.log('A user connected.');
-	setTimeout(() => {
-		const promoType = getContextualPromoType();
-		io.emit('show-promo', { promoType: promoType });
-	}, TRIGGER_DELAY_SECONDS * 1000);
-
-	socket.on('remote-input', (data) => {
-		io.emit('tv-command', data);
-	});
+	// Promo is now handled client-side with countdown
+	// No need for server-side timing
 });
 
 server.listen(PORT, '0.0.0.0', () => console.log(`Server is listening on port ${PORT}`));

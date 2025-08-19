@@ -8,323 +8,287 @@
 	<link rel="dns-prefetch" href="https://www.figma.com">
 	<link rel="dns-prefetch" href="https://embed.figma.com">
 	<style>
-		body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-		iframe { width: 100%; height: 100%; border: none; }
+		body, html { 
+			margin: 0; 
+			padding: 0; 
+			height: 100%; 
+			overflow: hidden; 
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			background: #000;
+			color: #fff;
+		}
+		
+		.loading-screen {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			z-index: 10000;
+		}
+		
+		.loading-content {
+			text-align: center;
+			max-width: 600px;
+			padding: 40px;
+		}
+		
+		.loading-title {
+			font-size: 48px;
+			font-weight: bold;
+			margin-bottom: 30px;
+			text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+		}
+		
+		.loading-subtitle {
+			font-size: 24px;
+			margin-bottom: 40px;
+			opacity: 0.9;
+		}
+		
+		.loading-instructions {
+			font-size: 18px;
+			line-height: 1.6;
+			margin-bottom: 40px;
+			opacity: 0.8;
+		}
+		
+		.loading-progress {
+			width: 100%;
+			height: 8px;
+			background: rgba(255,255,255,0.2);
+			border-radius: 4px;
+			overflow: hidden;
+			margin-bottom: 20px;
+		}
+		
+		.loading-bar {
+			height: 100%;
+			background: linear-gradient(90deg, #4CAF50, #45a049);
+			width: 0%;
+			transition: width 0.3s ease;
+		}
+		
+		.loading-status {
+			font-size: 16px;
+			opacity: 0.7;
+		}
+		
+		.tv-screen {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			display: none;
+		}
+		
+		iframe { 
+			width: 100%; 
+			height: 100%; 
+			border: none; 
+		}
+		
+		.enter-hint {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: rgba(0,0,0,0.8);
+			color: #fff;
+			padding: 10px 15px;
+			border-radius: 6px;
+			font-size: 14px;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			pointer-events: none;
+		}
+		
+		.enter-hint.show {
+			opacity: 1;
+		}
 	</style>
 </head>
 <body>
-    <iframe id="figma-embed" src=""></iframe>
+	<!-- Loading Screen -->
+	<div id="loading-screen" class="loading-screen">
+		<div class="loading-content">
+			<div class="loading-title">🎬 Fubo TV Prototype</div>
+			<div class="loading-subtitle">Loading your TV experience...</div>
+			<div class="loading-instructions">
+				<strong>How to use:</strong><br>
+				• Watch the content automatically<br>
+				• When you see an action prompt, press <strong>ENTER</strong> to dismiss<br>
+				• Sit back and enjoy the show!
+			</div>
+			<div class="loading-progress">
+				<div id="loading-bar" class="loading-bar"></div>
+			</div>
+			<div id="loading-status" class="loading-status">Initializing...</div>
+		</div>
+	</div>
+	
+	<!-- TV Screen -->
+	<div id="tv-screen" class="tv-screen">
+		<iframe id="figma-embed" src=""></iframe>
+		<div id="enter-hint" class="enter-hint">Press ENTER to dismiss</div>
+	</div>
 
 	<script src="/socket.io/socket.io.js"></script>
-	<script>
+		<script>
 		const socket = io({ transports: ['websocket'], upgrade: false });
-		// Connection status and video optimization indicators
-		(function(){
-			const statusEl = document.createElement('div');
-			statusEl.style.position = 'fixed';
-			statusEl.style.bottom = '8px';
-			statusEl.style.left = '8px';
-			statusEl.style.padding = '6px 8px';
-			statusEl.style.background = 'rgba(0,0,0,0.6)';
-			statusEl.style.color = '#fff';
-			statusEl.style.fontSize = '12px';
-			statusEl.style.borderRadius = '4px';
-			statusEl.style.zIndex = '9999';
-			statusEl.innerText = 'connecting...';
-			document.body.appendChild(statusEl);
-			
-			// Add video optimization indicator
-			const videoOptEl = document.createElement('div');
-			videoOptEl.style.position = 'fixed';
-			videoOptEl.style.bottom = '8px';
-			videoOptEl.style.right = '8px';
-			videoOptEl.style.padding = '6px 8px';
-			videoOptEl.style.background = 'rgba(0,128,0,0.6)';
-			videoOptEl.style.color = '#fff';
-			videoOptEl.style.fontSize = '12px';
-			videoOptEl.style.borderRadius = '4px';
-			videoOptEl.style.zIndex = '9999';
-			videoOptEl.innerText = 'video optimized';
-			document.body.appendChild(videoOptEl);
-			
-			// Add promo countdown indicator
-			const countdownEl = document.createElement('div');
-			countdownEl.style.position = 'fixed';
-			countdownEl.style.top = '8px';
-			countdownEl.style.right = '8px';
-			countdownEl.style.padding = '8px';
-			countdownEl.style.background = 'rgba(255,165,0,0.8)';
-			countdownEl.style.color = '#fff';
-			countdownEl.style.fontSize = '14px';
-			countdownEl.style.borderRadius = '4px';
-			countdownEl.style.zIndex = '9999';
-			countdownEl.innerText = 'Video loading...';
-			countdownEl.style.display = 'none';
-			document.body.appendChild(countdownEl);
-			
-			// Function to start countdown after video loads
-			function startPromoCountdown() {
-				countdownEl.style.display = 'block';
-				countdownEl.innerText = 'Promo in 10s';
-				countdownEl.style.background = 'rgba(255,165,0,0.8)';
-				
-				let countdown = 10;
-				const countdownInterval = setInterval(() => {
-					countdown--;
-					if (countdown > 0) {
-						countdownEl.innerText = `Promo in ${countdown}s`;
-					} else {
-						countdownEl.innerText = 'Promo appearing...';
-						countdownEl.style.background = 'rgba(255,0,0,0.8)';
-						clearInterval(countdownInterval);
-						
-						// Hide countdown after promo appears
-						setTimeout(() => {
-							countdownEl.style.display = 'none';
-						}, 3000);
-					}
-				}, 1000);
-			}
-			
-			// Add frame testing interface
-			const testEl = document.createElement('div');
-			testEl.style.position = 'fixed';
-			testEl.style.top = '8px';
-			testEl.style.left = '8px';
-			testEl.style.padding = '8px';
-			testEl.style.background = 'rgba(0,0,0,0.8)';
-			testEl.style.color = '#fff';
-			testEl.style.fontSize = '11px';
-			testEl.style.borderRadius = '4px';
-			testEl.style.zIndex = '9999';
-			testEl.innerHTML = `
-				<div>Test Frames:</div>
-				<button onclick="changeState('game_playing')" style="margin:2px;padding:4px;font-size:10px;">Game</button>
-				<button onclick="changeState('sports_promo_focus_watchnow')" style="margin:2px;padding:4px;font-size:10px;">Sports</button>
-				<button onclick="changeState('primetime_promo_focus_watchnow')" style="margin:2px;padding:4px;font-size:10px;">Primetime</button>
-				<button onclick="changeState('sports_content')" style="margin:2px;padding:4px;font-size:10px;">Sports Video</button>
-				<button onclick="changeState('primetime_content')" style="margin:2px;padding:4px;font-size:10px;">Primetime Video</button>
-				<hr style="margin:4px 0;border-color:#666;">
-				<div>Test Promos:</div>
-				<button onclick="fetch('/test-sports')" style="margin:2px;padding:4px;font-size:10px;background:#4CAF50;">Test Sports</button>
-				<button onclick="fetch('/test-entertainment')" style="margin:2px;padding:4px;font-size:10px;background:#FF9800;">Test Entertainment</button>
-				<button onclick="fetch('/reset-game')" style="margin:2px;padding:4px;font-size:10px;background:#f44336;">Reset</button>
-			`;
-			document.body.appendChild(testEl);
-			
-			socket.on('connect', () => statusEl.innerText = 'connected');
-			socket.on('disconnect', () => statusEl.innerText = 'disconnected');
-		})();
 		const figmaFrame = document.getElementById('figma-embed');
+		const loadingScreen = document.getElementById('loading-screen');
+		const tvScreen = document.getElementById('tv-screen');
+		const loadingBar = document.getElementById('loading-bar');
+		const loadingStatus = document.getElementById('loading-status');
+		const enterHint = document.getElementById('enter-hint');
 
-        const figmaLinks = {
-            'game_playing': "https://www.figma.com/proto/8SRVqAPXzL0B9Fa2bmv3wk/Untitled?node-id=1-2&viewport=225%2C420%2C0.06&t=RGZxlwHFVsCU0VCO-0&scaling=contain&content-scaling=fixed&starting-point-node-id=1%3A2&show-proto-sidebar=1",
-            'sports_promo_focus_watchnow': "https://www.figma.com/proto/8SRVqAPXzL0B9Fa2bmv3wk/Untitled?node-id=1-3&viewport=225%2C420%2C0.06&t=RGZxlwHFVsCU0VCO-0&scaling=contain&content-scaling=fixed&starting-point-node-id=1%3A3&show-proto-sidebar=1",
-            'sports_promo_focus_dismiss': "https://www.figma.com/proto/8SRVqAPXzL0B9Fa2bmv3wk/Untitled?node-id=1-4&viewport=225%2C420%2C0.06&t=RGZxlwHFVsCU0VCO-0&scaling=contain&content-scaling=fixed&starting-point-node-id=1%3A4&show-proto-sidebar=1",
-            'primetime_promo_focus_watchnow': "https://www.figma.com/proto/8SRVqAPXzL0B9Fa2bmv3wk/Untitled?node-id=1-5&viewport=225%2C420%2C0.06&t=RGZxlwHFVsCU0VCO-0&scaling=contain&content-scaling=fixed&starting-point-node-id=1%3A5&show-proto-sidebar=1",
-            'primetime_promo_focus_dismiss': "https://www.figma.com/proto/8SRVqAPXzL0B9Fa2bmv3wk/Untitled?node-id=1-6&viewport=225%2C420%2C0.06&t=RGZxlwHFVsCU0VCO-0&scaling=contain&content-scaling=fixed&starting-point-node-id=1%3A6&show-proto-sidebar=1",
-            'sports_content': "https://www.figma.com/proto/8SRVqAPXzL0B9Fa2bmv3wk/Untitled?node-id=1-7&viewport=-168%2C448%2C0.06&t=RGZxlwHFVsCU0VCO-0&scaling=contain&content-scaling=fixed&starting-point-node-id=1%3A7&show-proto-sidebar=1",
-            'primetime_content': "https://www.figma.com/proto/8SRVqAPXzL0B9Fa2bmv3wk/Untitled?node-id=1-8&viewport=-168%2C448%2C0.06&t=RGZxlwHFVsCU0VCO-0&scaling=contain&content-scaling=fixed&starting-point-node-id=1%3A8&show-proto-sidebar=1"
-        };
-
-        function toEmbedUrl(url) {
-            if (!url) return '';
-            // If it's already an embed URL, keep it; else wrap inside Figma embed host
-            if (url.includes('embed.figma.com')) return url;
-            const encoded = encodeURIComponent(url);
-            // Video-optimized embed settings: hide UI, disable hotspots, enable autoplay
-            return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=1&url=${encoded}`;
-        }
+		// Figma prototype links
+		const figmaLinks = {
+			'game_playing': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4465-39526&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4465%3A39526&show-proto-sidebar=1",
+			'sports_promo_focus_watchnow': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4482-207&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4482%3A207&show-proto-sidebar=1",
+			'sports_promo_focus_dismiss': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4414-39703&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4414%3A39703&show-proto-sidebar=1",
+			'primetime_promo_focus_watchnow': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4414-39748&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4414%3A39748&show-proto-sidebar=1"
+		};
 
 		let currentState = 'game_playing';
+		let promoCountdown = null;
 
-        function changeState(newState) {
-			console.log('changeState called with:', newState);
-			console.log('Available states:', Object.keys(figmaLinks));
+		// Convert Figma URLs to embed URLs
+		function toEmbedUrl(url) {
+			if (!url) return '';
+			if (url.includes('embed.figma.com')) return url;
+			const encoded = encodeURIComponent(url);
+			// Fullscreen, no UI, optimized for TV experience
+			return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=1&url=${encoded}`;
+		}
+
+		// Preload all Figma content
+		async function preloadContent() {
+			const states = Object.keys(figmaLinks);
+			let loadedCount = 0;
 			
-			if (figmaLinks[newState]) {
-                // Don't reload iframe for video content - just track state
-                if (newState.includes('content')) {
-                    // For content states, just update the state without reloading
-                    currentState = newState;
-                    console.log('Video content state changed to:', newState);
-                    
-                    // Show content indicator instead of loading
-                    showContentIndicator(newState);
-                } else {
-                    // For promo states, we still need to change frames
-                    const loadingEl = document.querySelector('.loading-indicator') || createLoadingIndicator();
-                    loadingEl.style.display = 'block';
-                    
-                    const nextUrl = toEmbedUrl(figmaLinks[newState]);
-                    figmaFrame.src = nextUrl;
-                    currentState = newState;
-                    
-                    // Hide loading after iframe loads
-                    setTimeout(() => {
-                        loadingEl.style.display = 'none';
-                    }, 500);
-                }
+			for (const state of states) {
+				loadingStatus.textContent = `Loading ${state.replace(/_/g, ' ')}...`;
+				loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
+				
+				// Create hidden iframe to preload content
+				const preloadFrame = document.createElement('iframe');
+				preloadFrame.style.display = 'none';
+				preloadFrame.src = toEmbedUrl(figmaLinks[state]);
+				
+				preloadFrame.onload = () => {
+					loadedCount++;
+					loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
+					
+					if (loadedCount === states.length) {
+						// All content preloaded, show TV screen
+						setTimeout(() => {
+							showTVScreen();
+						}, 500);
+					}
+				};
+				
+				document.body.appendChild(preloadFrame);
 			}
 		}
-        
-        function showContentIndicator(contentType) {
-            // Remove existing content indicator
-            const existing = document.querySelector('.content-indicator');
-            if (existing) existing.remove();
-            
-            // Create new content indicator
-            const indicator = document.createElement('div');
-            indicator.className = 'content-indicator';
-            indicator.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0,0,0,0.9);
-                color: white;
-                padding: 30px 60px;
-                border-radius: 12px;
-                font-size: 24px;
-                z-index: 10000;
-                text-align: center;
-                font-weight: bold;
-            `;
-            
-            if (contentType === 'sports_content') {
-                indicator.innerHTML = '🏈 SPORTS CONTENT<br><span style="font-size:16px;opacity:0.8;">Video continues playing...</span>';
-            } else if (contentType === 'primetime_content') {
-                indicator.innerHTML = '📺 PRIMETIME CONTENT<br><span style="font-size:16px;opacity:0.8;">Video continues playing...</span>';
-            }
-            
-            document.body.appendChild(indicator);
-            
-            // Auto-hide after 3 seconds
-            setTimeout(() => {
-                if (indicator.parentNode) {
-                    indicator.style.opacity = '0';
-                    indicator.style.transition = 'opacity 1s';
-                    setTimeout(() => {
-                        if (indicator.parentNode) indicator.remove();
-                    }, 1000);
-                }
-            }, 3000);
-        }
-        
-        function createLoadingIndicator() {
-            const loadingEl = document.createElement('div');
-            loadingEl.className = 'loading-indicator';
-            loadingEl.innerHTML = 'Loading...';
-            loadingEl.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 20px 40px;
-                border-radius: 8px;
-                font-size: 18px;
-                z-index: 10000;
-                display: none;
-            `;
-            document.body.appendChild(loadingEl);
-            return loadingEl;
-        }
 
-        // Initialize the iframe with the initial state
-        console.log('Initializing with game_playing state...');
-        changeState('game_playing');
-        
-        // Debug: Log all available states
-        console.log('Available states:', Object.keys(figmaLinks));
-        console.log('Current state:', currentState);
-        
-        // Add iframe load event handling for video content
-        figmaFrame.addEventListener('load', function() {
-            // Hide loading indicator when iframe content loads
-            const loadingEl = document.querySelector('.loading-indicator');
-            if (loadingEl) {
-                loadingEl.style.display = 'none';
-            }
-            
-            // Log state changes for debugging
-            console.log('State changed to:', currentState);
-            
-            // Start promo countdown only after the initial game_playing frame loads
-            if (currentState === 'game_playing') {
-                console.log('Game frame loaded, starting promo countdown...');
-                // Small delay to ensure video is fully loaded
-                setTimeout(() => {
-                    startPromoCountdown();
-                }, 1000);
-            }
-        });
-        
-        // Add error handling for iframe loading issues
-        figmaFrame.addEventListener('error', function() {
-            console.error('Error loading Figma content');
-            const loadingEl = document.querySelector('.loading-indicator');
-            if (loadingEl) {
-                loadingEl.style.display = 'none';
-            }
-        });
+		// Show TV screen and start experience
+		function showTVScreen() {
+			loadingScreen.style.display = 'none';
+			tvScreen.style.display = 'block';
+			
+			// Load initial game playing state
+			figmaFrame.src = toEmbedUrl(figmaLinks['game_playing']);
+			currentState = 'game_playing';
+			
+			// Start promo countdown after video loads
+			figmaFrame.onload = () => {
+				startPromoCountdown();
+			};
+		}
 
-		socket.on('show-promo', (data) => {
-			console.log('Received show-promo event:', data);
-			if (currentState === 'game_playing') {
-				// Map the promo type to the correct state
-				let targetState;
-				if (data.promoType === 'sports_promo') {
-					targetState = 'sports_promo_focus_watchnow';
-				} else if (data.promoType === 'primetime_promo') {
-					targetState = 'primetime_promo_focus_watchnow';
-				} else {
-					console.error('Unknown promo type:', data.promoType);
-					return;
+		// Start promo countdown
+		function startPromoCountdown() {
+			let countdown = 10;
+			promoCountdown = setInterval(() => {
+				countdown--;
+				if (countdown <= 0) {
+					clearInterval(promoCountdown);
+					showPromo();
 				}
-				
-				console.log('Changing to state:', targetState);
-				changeState(targetState);
+			}, 1000);
+		}
+
+		// Show appropriate promo based on time
+		function showPromo() {
+			const now = new Date();
+			const hour = now.getHours();
+			
+			let targetState;
+			if (hour >= 16) { // 4 PM or later
+				targetState = 'primetime_promo_focus_watchnow';
 			} else {
-				console.log('Not in game_playing state, current state:', currentState);
+				targetState = 'sports_promo_focus_watchnow';
 			}
-		});
-		
-		// Handle reset to game playing
-		socket.on('reset-to-game', () => {
-			console.log('Resetting to game playing state');
-			changeState('game_playing');
+			
+			changeState(targetState);
+		}
+
+		// Change to different state
+		function changeState(newState) {
+			if (figmaLinks[newState]) {
+				currentState = newState;
+				figmaFrame.src = toEmbedUrl(figmaLinks[newState]);
+				
+				// Show enter hint for dismissable states
+				if (newState.includes('dismiss')) {
+					enterHint.classList.add('show');
+				} else {
+					enterHint.classList.remove('show');
+				}
+			}
+		}
+
+		// Handle Enter key for dismissal
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' && currentState.includes('dismiss')) {
+				// Return to game playing
+				changeState('game_playing');
+				enterHint.classList.remove('show');
+				
+				// Restart promo countdown
+				if (promoCountdown) clearInterval(promoCountdown);
+				setTimeout(() => {
+					startPromoCountdown();
+				}, 2000);
+			}
 		});
 
-		socket.on('tv-command', (data) => {
-			const key = data.key;
-			switch (currentState) {
-				case 'sports_promo_focus_watchnow':
-					if (key === 'down' || key === 'right') changeState('sports_promo_focus_dismiss');
-					else if (key === 'ok') changeState('sports_content');
-					break;
-				case 'sports_promo_focus_dismiss':
-					if (key === 'up' || key === 'left') changeState('sports_promo_focus_watchnow');
-					else if (key === 'ok') changeState('game_playing');
-					break;
-				case 'primetime_promo_focus_watchnow':
-					if (key === 'down' || key === 'right') changeState('primetime_promo_focus_dismiss');
-					else if (key === 'ok') changeState('primetime_content');
-					break;
-				case 'primetime_promo_focus_dismiss':
-					if (key === 'up' || key === 'left') changeState('primetime_promo_focus_watchnow');
-					else if (key === 'ok') changeState('game_playing');
-					break;
-				case 'sports_content':
-				case 'primetime_content':
-					// From content states, any key returns to game playing
-					if (key === 'ok' || key === 'up' || key === 'down' || key === 'left' || key === 'right') {
-						changeState('game_playing');
-					}
-					break;
+		// Socket events for testing
+		socket.on('show-promo', (data) => {
+			if (data.promoType === 'sports_promo') {
+				changeState('sports_promo_focus_watchnow');
+			} else if (data.promoType === 'primetime_promo') {
+				changeState('primetime_promo_focus_watchnow');
 			}
 		});
+
+		socket.on('reset-to-game', () => {
+			changeState('game_playing');
+			if (promoCountdown) clearInterval(promoCountdown);
+			setTimeout(() => {
+				startPromoCountdown();
+			}, 2000);
+		});
+
+		// Start preloading content
+		preloadContent();
 	</script>
 </body>
 </html>
