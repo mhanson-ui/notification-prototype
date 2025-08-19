@@ -108,7 +108,7 @@
         <iframe 
             id="ribbon-user-dismiss-frame" 
             class="ribbon-user-dismiss-frame"
-            src=""
+            style="opacity: 0; transition: opacity 0.3s ease-in-out;"
             tabindex="0"
             allowfullscreen>
         </iframe>
@@ -126,7 +126,6 @@
             dots++;
         }, 400);
         
-        // Ribbon User Dismiss Figma link
         const ribbonUserDismissUrl = "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4414-39703&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4414%3A39703&show-proto-sidebar=1";
         
         function toEmbedUrl(url, autoplay = 1) {
@@ -136,34 +135,27 @@
             return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=${autoplay}&url=${encoded}`;
         }
         
-        // Preload in a hidden offscreen iframe to warm cache, but do not set visible iframe src yet
-        const preloadContainer = document.createElement('div');
-        preloadContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
-        document.body.appendChild(preloadContainer);
-        const preloadFrame = document.createElement('iframe');
-        preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
-        preloadFrame.src = toEmbedUrl(ribbonUserDismissUrl, 0);
-        preloadFrame.onload = () => {
-            setTimeout(() => {
-                beginBtn.disabled = false;
-                loadingStatus.textContent = 'Ready to start. Press Enter to use the CTA once visible.';
-            }, 2000);
+        // Start loading the Figma content immediately in the single iframe
+        ribbonUserDismissFrame.src = toEmbedUrl(ribbonUserDismissUrl);
+        ribbonUserDismissFrame.onload = () => {
+            beginBtn.disabled = false;
+            loadingStatus.textContent = 'Ready to start. Press Enter to use the CTA once visible.';
         };
-        preloadContainer.appendChild(preloadFrame);
 
-        // Start only when participant clicks: restart from beginning using cache warmed by hidden preload
+        // On click, hide loading and fade in the iframe
         beginBtn.addEventListener('click', () => {
-            beginBtn.disabled = true;
-            beginBtn.textContent = 'Starting...';
-            ribbonUserDismissFrame.src = toEmbedUrl(ribbonUserDismissUrl);
-            ribbonUserDismissFrame.onload = () => {
-                clearInterval(dotTimer);
-                loading.classList.add('hidden');
-                setTimeout(() => {
-                    try { ribbonUserDismissFrame.focus(); ribbonUserDismissFrame.contentWindow && ribbonUserDismissFrame.contentWindow.focus(); } catch (e) {}
-                }, 0);
-                try { preloadContainer.remove(); } catch (e) {}
-            };
+            clearInterval(dotTimer);
+            loading.classList.add('hidden');
+            ribbonUserDismissFrame.style.opacity = '1';
+
+            setTimeout(() => {
+                try {
+                    ribbonUserDismissFrame.focus();
+                    if (ribbonUserDismissFrame.contentWindow) {
+                        ribbonUserDismissFrame.contentWindow.focus();
+                    }
+                } catch (e) {}
+            }, 50);
         });
         
         // Handle Enter key for dismissal
