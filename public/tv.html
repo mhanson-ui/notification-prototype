@@ -236,7 +236,7 @@
 						
 						// Preload next state
 						preloadNext(index + 1);
-					}, 1500); // Reduced wait time
+					}, 2000); // Extra render buffer for zero-latency
 				};
 				
 				preloadContainer.appendChild(preloadFrame);
@@ -260,7 +260,7 @@
 				if (!loaded) {
 					loadingStatus.textContent = 'Almost there...';
 				}
-			}, 1500);
+			}, 2500);
 			
 			figmaFrame.onload = () => {
 				loaded = true;

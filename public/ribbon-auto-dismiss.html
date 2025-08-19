@@ -115,9 +115,10 @@
         
         // Enable CTA when iframe has preloaded behind the overlay
         ribbonAutoDismissFrame.onload = () => {
+            // Extra render buffer to ensure zero-latency start
             setTimeout(() => {
                 beginBtn.disabled = false;
-            }, 500);
+            }, 2000);
         };
 
         // Start only when participant clicks
