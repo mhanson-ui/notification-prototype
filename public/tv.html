@@ -173,28 +173,42 @@
 			const states = Object.keys(figmaLinks);
 			let loadedCount = 0;
 			
+			// Create a container for preload iframes
+			const preloadContainer = document.createElement('div');
+			preloadContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
+			document.body.appendChild(preloadContainer);
+			
+			// Preload each state
 			for (const state of states) {
-				loadingStatus.textContent = `Loading ${state.replace(/_/g, ' ')}...`;
+				loadingStatus.textContent = `Preloading ${state.replace(/_/g, ' ')}...`;
 				loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
 				
 				// Create hidden iframe to preload content
 				const preloadFrame = document.createElement('iframe');
-				preloadFrame.style.display = 'none';
+				preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
 				preloadFrame.src = toEmbedUrl(figmaLinks[state]);
 				
+				// Wait for iframe to fully load
 				preloadFrame.onload = () => {
-					loadedCount++;
-					loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
-					
-					if (loadedCount === states.length) {
-						// All content preloaded, show TV screen
-						setTimeout(() => {
-							showTVScreen();
-						}, 500);
-					}
+					// Additional wait to ensure Figma content is fully rendered
+					setTimeout(() => {
+						loadedCount++;
+						loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
+						loadingStatus.textContent = `Preloaded ${loadedCount}/${states.length} states...`;
+						
+						if (loadedCount === states.length) {
+							// All content preloaded, show TV screen
+							loadingStatus.textContent = 'All content ready! Starting TV experience...';
+							setTimeout(() => {
+								showTVScreen();
+								// Clean up preload iframes
+								preloadContainer.remove();
+							}, 1000);
+						}
+					}, 2000); // Wait 2 seconds for Figma to fully render
 				};
 				
-				document.body.appendChild(preloadFrame);
+				preloadContainer.appendChild(preloadFrame);
 			}
 		}
 
@@ -203,14 +217,23 @@
 			loadingScreen.style.display = 'none';
 			tvScreen.style.display = 'block';
 			
-			// Load initial game playing state
+			// Since content is preloaded, this should load instantly
 			figmaFrame.src = toEmbedUrl(figmaLinks['game_playing']);
 			currentState = 'game_playing';
 			
 			// Start promo countdown after video loads
 			figmaFrame.onload = () => {
+				console.log('Main iframe loaded, starting promo countdown...');
 				startPromoCountdown();
 			};
+			
+			// Fallback: if iframe doesn't load quickly, still start countdown
+			setTimeout(() => {
+				if (!promoCountdown) {
+					console.log('Fallback: starting promo countdown...');
+					startPromoCountdown();
+				}
+			}, 3000);
 		}
 
 		// Start promo countdown
@@ -288,6 +311,7 @@
 		});
 
 		// Start preloading content
+		console.log('Starting content preload...');
 		preloadContent();
 	</script>
 </body>
