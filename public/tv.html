@@ -89,7 +89,14 @@
 			font-size: 16px;
 			font-weight: 600;
 			cursor: pointer;
-			display: none;
+			display: inline-block;
+		}
+
+		.loading-cta[disabled] {
+			background: #666;
+			color: #bbb;
+			cursor: not-allowed;
+			opacity: 0.6;
 		}
 
 		.loading-cta:active { transform: scale(0.99); }
@@ -165,6 +172,7 @@
 		const loadingBar = document.getElementById('loading-bar');
 		const loadingStatus = document.getElementById('loading-status');
 		const enterHint = document.getElementById('enter-hint');
+		const beginBtn = document.getElementById('begin-btn');
 
 		// Figma prototype links
 		const figmaLinks = {
@@ -198,10 +206,8 @@
 			// Preload states sequentially to avoid overwhelming WebGL contexts
 			async function preloadNext(index) {
 				if (index >= states.length) {
-					// All content preloaded, reveal CTA to start
-					loadingStatus.textContent = 'All content ready!';
-					const beginBtn = document.getElementById('begin-btn');
-					beginBtn.style.display = 'inline-block';
+					// All content preloaded, enable CTA
+					loadingStatus.textContent = 'All content ready! Click begin to start';
 					beginBtn.disabled = false;
 					// Clean up preload iframes now that cache is warm
 					preloadContainer.remove();
@@ -296,7 +302,8 @@
 		});
 
 		// Wire CTA to start once preloaded
-		const beginBtn = document.getElementById('begin-btn');
+		// Show CTA immediately but disabled until preload completes
+		beginBtn.disabled = true;
 		beginBtn.addEventListener('click', () => {
 			beginBtn.disabled = true;
 			beginBtn.textContent = 'Loading...';
