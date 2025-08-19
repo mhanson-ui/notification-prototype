@@ -200,12 +200,12 @@
 		let warmedGameFrame = null;
 
 		// Convert Figma URLs to embed URLs
-		function toEmbedUrl(url) {
+		function toEmbedUrl(url, autoplay = 1) {
 			if (!url) return '';
 			if (url.includes('embed.figma.com')) return url;
 			const encoded = encodeURIComponent(url);
 			// Fullscreen, no UI, optimized for TV experience
-			return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=1&url=${encoded}`;
+			return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=${autoplay}&url=${encoded}`;
 		}
 
 		// Preload all Figma content for zero latency - sequential to avoid WebGL context issues
@@ -237,7 +237,7 @@
 				// Create hidden iframe to preload content
 				const preloadFrame = document.createElement('iframe');
 				preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
-				preloadFrame.src = toEmbedUrl(figmaLinks[state]);
+				preloadFrame.src = toEmbedUrl(figmaLinks[state], 0);
 				
 				// Wait for iframe to load, then move to next
 				preloadFrame.onload = () => {

@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fubo TV - Toast: Auto-dismiss</title>
+    <link rel="preconnect" href="https://www.figma.com">
+    <link rel="preconnect" href="https://embed.figma.com">
+    <link rel="dns-prefetch" href="https://www.figma.com">
+    <link rel="dns-prefetch" href="https://embed.figma.com">
     <style>
         * {
             margin: 0;
@@ -125,11 +129,11 @@
         // Toast Auto-dismiss Figma link
         const toastAutoDismissUrl = "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4482-207&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4482%3A207&show-proto-sidebar=1";
         
-        function toEmbedUrl(url) {
+        function toEmbedUrl(url, autoplay = 1) {
             if (!url) return '';
             if (url.includes('embed.figma.com')) return url;
             const encoded = encodeURIComponent(url);
-            return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=1&url=${encoded}`;
+            return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=${autoplay}&url=${encoded}`;
         }
         
         // Preload in a hidden offscreen iframe to warm cache, but do not set visible iframe src yet
@@ -138,7 +142,7 @@
         document.body.appendChild(preloadContainer);
         const preloadFrame = document.createElement('iframe');
         preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
-        preloadFrame.src = toEmbedUrl(toastAutoDismissUrl);
+        preloadFrame.src = toEmbedUrl(toastAutoDismissUrl, 0);
         preloadFrame.onload = () => {
             setTimeout(() => {
                 beginBtn.disabled = false;
