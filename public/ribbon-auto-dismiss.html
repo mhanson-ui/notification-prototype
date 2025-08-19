@@ -98,9 +98,7 @@
 <body>
     <div class="ribbon-auto-dismiss-container">
         <div id="loading" class="loading">
-            <div class="spinner"></div>
             <div>Loading Ribbon: Auto-dismiss...</div>
-            <div id="loading-status" class="loading-status">Warming content…</div>
             <div class="instructions">This variant auto-dismisses; no input required.</div>
             <button id="begin-btn" class="loading-cta" disabled>Click to begin</button>
         </div>
@@ -118,13 +116,6 @@
         const ribbonAutoDismissFrame = document.getElementById('ribbon-auto-dismiss-frame');
         const loading = document.getElementById('loading');
         const beginBtn = document.getElementById('begin-btn');
-        const loadingStatus = document.getElementById('loading-status');
-        let dots = 0;
-        const dotTimer = setInterval(() => {
-            const suffix = '.'.repeat(dots % 4);
-            loadingStatus.textContent = `Warming content${suffix}`;
-            dots++;
-        }, 400);
         
         const ribbonAutoDismissUrl = "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4414-39748&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4414%3A39748&show-proto-sidebar=1";
         
@@ -135,30 +126,33 @@
             return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=${autoplay}&url=${encoded}`;
         }
         
-        // Start loading the Figma content immediately in the single iframe
-        ribbonAutoDismissFrame.src = toEmbedUrl(ribbonAutoDismissUrl);
-        // When the iframe is fully loaded, wait for render, then enable the CTA
+        // Preload the iframe content without autoplaying
+        ribbonAutoDismissFrame.src = toEmbedUrl(ribbonAutoDismissUrl, 0);
+
+        // When preloaded, enable the CTA after a render buffer
         ribbonAutoDismissFrame.onload = () => {
             setTimeout(() => {
                 beginBtn.disabled = false;
-                loadingStatus.textContent = 'Ready to start.';
             }, 1500); // Artificial delay for Figma's internal rendering
         };
 
-        // On click, hide loading and fade in the iframe
+        // On click, reload with autoplay to restart the prototype, then show it
         beginBtn.addEventListener('click', () => {
-            clearInterval(dotTimer);
-            loading.classList.add('hidden');
-            ribbonAutoDismissFrame.style.opacity = '1';
+            ribbonAutoDismissFrame.src = toEmbedUrl(ribbonAutoDismissUrl, 1);
 
-            setTimeout(() => {
-                try {
-                    ribbonAutoDismissFrame.focus();
-                    if (ribbonAutoDismissFrame.contentWindow) {
-                        ribbonAutoDismissFrame.contentWindow.focus();
-                    }
-                } catch (e) {}
-            }, 50);
+            ribbonAutoDismissFrame.onload = () => {
+                loading.classList.add('hidden');
+                ribbonAutoDismissFrame.style.opacity = '1';
+
+                setTimeout(() => {
+                    try {
+                        ribbonAutoDismissFrame.focus();
+                        if (ribbonAutoDismissFrame.contentWindow) {
+                            ribbonAutoDismissFrame.contentWindow.focus();
+                        }
+                    } catch (e) {}
+                }, 50);
+            };
         });
         
         // Handle Enter key for dismissal

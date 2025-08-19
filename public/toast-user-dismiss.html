@@ -98,9 +98,7 @@
 <body>
     <div class="toast-user-dismiss-container">
         <div id="loading" class="loading">
-            <div class="spinner"></div>
             <div>Loading Toast: User Dismiss...</div>
-            <div id="loading-status" class="loading-status">Warming content…</div>
             <div class="instructions">When the prompt appears, you can press <strong>Enter</strong> to use the CTA.</div>
             <button id="begin-btn" class="loading-cta" disabled>Click to begin</button>
         </div>
@@ -118,15 +116,7 @@
         const toastUserDismissFrame = document.getElementById('toast-user-dismiss-frame');
         const loading = document.getElementById('loading');
         const beginBtn = document.getElementById('begin-btn');
-        const loadingStatus = document.getElementById('loading-status');
 
-        let dots = 0;
-        const dotTimer = setInterval(() => {
-            const suffix = '.'.repeat(dots % 4);
-            loadingStatus.textContent = `Warming content${suffix}`;
-            dots++;
-        }, 400);
-        
         const toastUserDismissUrl = "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4465-39526&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4465%3A39526&show-proto-sidebar=1";
         
         function toEmbedUrl(url, autoplay = 1) {
@@ -138,31 +128,33 @@
         
         // === Main Logic ===
 
-        // 1. Start loading the Figma content immediately in the single iframe
-        toastUserDismissFrame.src = toEmbedUrl(toastUserDismissUrl);
+        // 1. Preload the iframe content without autoplaying
+        toastUserDismissFrame.src = toEmbedUrl(toastUserDismissUrl, 0);
 
-        // 2. When the iframe is fully loaded, wait a moment for it to render, then enable the CTA
+        // 2. When the iframe is fully preloaded, enable the CTA after a short render buffer
         toastUserDismissFrame.onload = () => {
             setTimeout(() => {
                 beginBtn.disabled = false;
-                loadingStatus.textContent = 'Ready to start. Press Enter to use the CTA once visible.';
             }, 1500); // Artificial delay to ensure Figma's internal content is fully rendered
         };
 
-        // 3. On click, hide loading and fade in the iframe
+        // 3. On click, reload the iframe with autoplay to restart it, then show it
         beginBtn.addEventListener('click', () => {
-            clearInterval(dotTimer);
-            loading.classList.add('hidden');
-            toastUserDismissFrame.style.opacity = '1';
+            toastUserDismissFrame.src = toEmbedUrl(toastUserDismissUrl, 1);
+            
+            toastUserDismissFrame.onload = () => {
+                loading.classList.add('hidden');
+                toastUserDismissFrame.style.opacity = '1';
 
-            setTimeout(() => {
-                try {
-                    toastUserDismissFrame.focus();
-                    if (toastUserDismissFrame.contentWindow) {
-                        toastUserDismissFrame.contentWindow.focus();
-                    }
-                } catch (e) {}
-            }, 50);
+                setTimeout(() => {
+                    try {
+                        toastUserDismissFrame.focus();
+                        if (toastUserDismissFrame.contentWindow) {
+                            toastUserDismissFrame.contentWindow.focus();
+                        }
+                    } catch (e) {}
+                }, 50);
+            };
         });
 
     </script>
