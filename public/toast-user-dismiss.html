@@ -132,24 +132,33 @@
             return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=1&url=${encoded}`;
         }
         
-        // Load the toast user dismiss
-        toastUserDismissFrame.src = toEmbedUrl(toastUserDismissUrl);
-        
-        // Enable CTA when iframe has preloaded behind the overlay
-        toastUserDismissFrame.onload = () => {
-            // Extra render buffer to ensure zero-latency start
+        // Preload in a hidden offscreen iframe to warm cache, but do not set visible iframe src yet
+        const preloadContainer = document.createElement('div');
+        preloadContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
+        document.body.appendChild(preloadContainer);
+        const preloadFrame = document.createElement('iframe');
+        preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
+        preloadFrame.src = toEmbedUrl(toastUserDismissUrl);
+        preloadFrame.onload = () => {
+            // Extra render buffer to ensure zero-latency once we swap in the real iframe
             setTimeout(() => {
                 beginBtn.disabled = false;
                 loadingStatus.textContent = 'Ready to start. Press Enter to use the CTA once visible.';
             }, 2000);
         };
+        preloadContainer.appendChild(preloadFrame);
 
-        // Start only when participant clicks
+        // Start only when participant clicks: now set the visible iframe src and hide overlay when loaded
         beginBtn.addEventListener('click', () => {
             beginBtn.disabled = true;
             beginBtn.textContent = 'Starting...';
-            clearInterval(dotTimer);
-            loading.classList.add('hidden');
+            toastUserDismissFrame.src = toEmbedUrl(toastUserDismissUrl);
+            toastUserDismissFrame.onload = () => {
+                clearInterval(dotTimer);
+                loading.classList.add('hidden');
+                // Cleanup hidden preload iframe to free resources
+                preloadContainer.remove();
+            };
         });
 
     </script>

@@ -131,24 +131,31 @@
             return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=1&url=${encoded}`;
         }
         
-        // Load the ribbon auto-dismiss
-        ribbonAutoDismissFrame.src = toEmbedUrl(ribbonAutoDismissUrl);
-        
-        // Enable CTA when iframe has preloaded behind the overlay
-        ribbonAutoDismissFrame.onload = () => {
-            // Extra render buffer to ensure zero-latency start
+        // Preload in a hidden offscreen iframe to warm cache, but do not set visible iframe src yet
+        const preloadContainer = document.createElement('div');
+        preloadContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
+        document.body.appendChild(preloadContainer);
+        const preloadFrame = document.createElement('iframe');
+        preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
+        preloadFrame.src = toEmbedUrl(ribbonAutoDismissUrl);
+        preloadFrame.onload = () => {
             setTimeout(() => {
                 beginBtn.disabled = false;
                 loadingStatus.textContent = 'Ready to start.';
             }, 2000);
         };
+        preloadContainer.appendChild(preloadFrame);
 
         // Start only when participant clicks
         beginBtn.addEventListener('click', () => {
             beginBtn.disabled = true;
             beginBtn.textContent = 'Starting...';
-            clearInterval(dotTimer);
-            loading.classList.add('hidden');
+            ribbonAutoDismissFrame.src = toEmbedUrl(ribbonAutoDismissUrl);
+            ribbonAutoDismissFrame.onload = () => {
+                clearInterval(dotTimer);
+                loading.classList.add('hidden');
+                preloadContainer.remove();
+            };
         });
         
         // Handle Enter key for dismissal
