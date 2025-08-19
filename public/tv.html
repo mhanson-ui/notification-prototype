@@ -197,6 +197,7 @@
 		};
 
 		let currentState = 'game_playing';
+		let warmedGameFrame = null;
 
 		// Convert Figma URLs to embed URLs
 		function toEmbedUrl(url) {
@@ -216,6 +217,7 @@
 			const preloadContainer = document.createElement('div');
 			preloadContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
 			document.body.appendChild(preloadContainer);
+			window.__preloadContainer = preloadContainer;
 			
 			// Preload states sequentially to avoid overwhelming WebGL contexts
 			async function preloadNext(index) {
@@ -224,8 +226,7 @@
 					loadingStatus.textContent = 'All content ready! Click begin to start';
 					beginBtn.disabled = false;
 					setPhase('ready');
-					// Clean up preload iframes now that cache is warm
-					preloadContainer.remove();
+					// Don't remove preload container yet if we preserved the warmed frame
 					return;
 				}
 				
@@ -246,8 +247,11 @@
 						loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
 						loadingStatus.textContent = `Preloaded ${loadedCount}/${states.length} states...`;
 						
-						// Remove this iframe to free up WebGL context
-						preloadFrame.remove();
+						if (state === 'game_playing') {
+							warmedGameFrame = preloadFrame;
+						} else {
+							preloadFrame.remove();
+						}
 						
 						// Preload next state
 						preloadNext(index + 1);
@@ -267,8 +271,32 @@
 			tvScreen.style.display = 'block';
 			loadingStatus.textContent = 'Starting...';
 			
-			figmaFrame.src = toEmbedUrl(figmaLinks['game_playing']);
 			currentState = 'game_playing';
+			// If we have a warmed game frame, swap it in instantly
+			if (warmedGameFrame) {
+				try {
+					warmedGameFrame.removeAttribute('style');
+					warmedGameFrame.id = 'figma-embed';
+					warmedGameFrame.setAttribute('tabindex', '0');
+					document.getElementById('tv-screen').replaceChild(warmedGameFrame, figmaFrame);
+					loadingScreen.style.display = 'none';
+					setPhase('playing');
+					setTimeout(() => {
+						try { warmedGameFrame.focus(); warmedGameFrame.contentWindow && warmedGameFrame.contentWindow.focus(); } catch (e) {}
+					}, 0);
+					// Clean up hidden container if present
+					if (window.__preloadContainer) {
+						try { window.__preloadContainer.remove(); } catch (e) {}
+					}
+					warmedGameFrame = null;
+					return;
+				} catch (e) {
+					console.warn('Swap failed; falling back to normal load', e);
+				}
+			}
+			
+			// Fallback: set src and wait for onload (overlay remains until ready)
+			figmaFrame.src = toEmbedUrl(figmaLinks['game_playing']);
 			
 			let loaded = false;
 			const readyTimeout = setTimeout(() => {

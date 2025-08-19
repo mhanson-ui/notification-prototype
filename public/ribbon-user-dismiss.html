@@ -147,19 +147,22 @@
         };
         preloadContainer.appendChild(preloadFrame);
 
-        // Start only when participant clicks
+        // Start only when participant clicks: swap the warmed hidden iframe into view for instant start
         beginBtn.addEventListener('click', () => {
             beginBtn.disabled = true;
             beginBtn.textContent = 'Starting...';
-            ribbonUserDismissFrame.src = toEmbedUrl(ribbonUserDismissUrl);
-            ribbonUserDismissFrame.onload = () => {
-                clearInterval(dotTimer);
-                loading.classList.add('hidden');
-                preloadContainer.remove();
-                setTimeout(() => {
-                    try { ribbonUserDismissFrame.focus(); ribbonUserDismissFrame.contentWindow && ribbonUserDismissFrame.contentWindow.focus(); } catch (e) {}
-                }, 0);
-            };
+            const container = document.querySelector('.ribbon-user-dismiss-container');
+            try { preloadContainer.removeChild(preloadFrame); } catch (e) {}
+            preloadFrame.removeAttribute('style');
+            preloadFrame.id = 'ribbon-user-dismiss-frame';
+            preloadFrame.className = 'ribbon-user-dismiss-frame';
+            container.replaceChild(preloadFrame, ribbonUserDismissFrame);
+            clearInterval(dotTimer);
+            loading.classList.add('hidden');
+            setTimeout(() => {
+                try { preloadFrame.focus(); preloadFrame.contentWindow && preloadFrame.contentWindow.focus(); } catch (e) {}
+            }, 0);
+            preloadContainer.remove();
         });
         
         // Handle Enter key for dismissal
