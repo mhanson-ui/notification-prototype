@@ -149,26 +149,19 @@
         };
         preloadContainer.appendChild(preloadFrame);
 
-        // Start only when participant clicks: swap the warmed hidden iframe into view for instant start
+        // Start only when participant clicks: restart from beginning using cache warmed by hidden preload
         beginBtn.addEventListener('click', () => {
             beginBtn.disabled = true;
             beginBtn.textContent = 'Starting...';
-            const container = document.querySelector('.toast-user-dismiss-container');
-            // Detach from preload container and attach to main container
-            try { preloadContainer.removeChild(preloadFrame); } catch (e) {}
-            preloadFrame.removeAttribute('style');
-            preloadFrame.id = 'toast-user-dismiss-frame';
-            preloadFrame.className = 'toast-user-dismiss-frame';
-            // Replace placeholder iframe to avoid double players
-            container.replaceChild(preloadFrame, toastUserDismissFrame);
-            clearInterval(dotTimer);
-            loading.classList.add('hidden');
-            // Ensure iframe is focused for immediate Enter key support
-            setTimeout(() => {
-                try { preloadFrame.focus(); preloadFrame.contentWindow && preloadFrame.contentWindow.focus(); } catch (e) {}
-            }, 0);
-            // Cleanup hidden container
-            preloadContainer.remove();
+            toastUserDismissFrame.src = toEmbedUrl(toastUserDismissUrl);
+            toastUserDismissFrame.onload = () => {
+                clearInterval(dotTimer);
+                loading.classList.add('hidden');
+                setTimeout(() => {
+                    try { toastUserDismissFrame.focus(); toastUserDismissFrame.contentWindow && toastUserDismissFrame.contentWindow.focus(); } catch (e) {}
+                }, 0);
+                try { preloadContainer.remove(); } catch (e) {}
+            };
         });
 
     </script>

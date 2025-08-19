@@ -147,22 +147,20 @@
         };
         preloadContainer.appendChild(preloadFrame);
 
-        // Start only when participant clicks: swap the warmed hidden iframe into view for instant start
+        // Start only when participant clicks: restart from beginning using cache warmed by hidden preload
         beginBtn.addEventListener('click', () => {
             beginBtn.disabled = true;
             beginBtn.textContent = 'Starting...';
-            const container = document.querySelector('.toast-auto-dismiss-container');
-            try { preloadContainer.removeChild(preloadFrame); } catch (e) {}
-            preloadFrame.removeAttribute('style');
-            preloadFrame.id = 'toast-auto-dismiss-frame';
-            preloadFrame.className = 'toast-auto-dismiss-frame';
-            container.replaceChild(preloadFrame, toastAutoDismissFrame);
-            clearInterval(dotTimer);
-            loading.classList.add('hidden');
-            setTimeout(() => {
-                try { preloadFrame.focus(); preloadFrame.contentWindow && preloadFrame.contentWindow.focus(); } catch (e) {}
-            }, 0);
-            preloadContainer.remove();
+            toastAutoDismissFrame.src = toEmbedUrl(toastAutoDismissUrl);
+            toastAutoDismissFrame.onload = () => {
+                clearInterval(dotTimer);
+                loading.classList.add('hidden');
+                setTimeout(() => {
+                    try { toastAutoDismissFrame.focus(); toastAutoDismissFrame.contentWindow && toastAutoDismissFrame.contentWindow.focus(); } catch (e) {}
+                }, 0);
+                // Cleanup hidden preloader
+                try { preloadContainer.remove(); } catch (e) {}
+            };
         });
         
         // Handle Enter key for dismissal
