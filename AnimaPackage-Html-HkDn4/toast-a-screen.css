@@ -1,0 +1,144 @@
+.toast-a-screen {
+  width: 1920px;
+  height: 1080px;
+  background-color: var(--color-semantic-bg-view-backdrop-solid);
+  overflow: hidden;
+}
+
+.toast-a-screen .div {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  width: 600px;
+  align-items: center;
+  position: relative;
+  top: 64px;
+  left: 1980px;
+  background-color: var(--color-palettes-black-o98);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid;
+  border-color: var(--color-palettes-neutral-lighter);
+  box-shadow: 0px 48px 96px #00000054;
+}
+
+.toast-a-screen .information-2 {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.toast-a-screen .programs-wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.toast-a-screen .b-ad-wrapper {
+  position: relative;
+  width: 112px;
+  height: 64px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.toast-a-screen .p-b-h-ad {
+  position: absolute;
+  width: 112px;
+  height: 64px;
+  top: 8401px;
+  left: -54635px;
+  object-fit: cover;
+}
+
+.toast-a-screen .text-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 16px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.toast-a-screen .primary-text-2 {
+  position: relative;
+  align-self: stretch;
+  margin-top: -1.00px;
+  font-family: var(--interactive-interactive-s-font-family);
+  font-weight: var(--interactive-interactive-s-font-weight);
+  color: var(--color-semantic-text-normal);
+  font-size: var(--interactive-interactive-s-font-size);
+  letter-spacing: var(--interactive-interactive-s-letter-spacing);
+  line-height: var(--interactive-interactive-s-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-style: var(--interactive-interactive-s-font-style);
+}
+
+.toast-a-screen .secondary-text-2 {
+  position: relative;
+  align-self: stretch;
+  height: 30px;
+  font-family: var(--body-paragraph-body-s-font-family);
+  font-weight: var(--body-paragraph-body-s-font-weight);
+  color: var(--color-semantic-text-subtle);
+  font-size: var(--body-paragraph-body-s-font-size);
+  letter-spacing: var(--body-paragraph-body-s-letter-spacing);
+  line-height: var(--body-paragraph-body-s-line-height);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  font-style: var(--body-paragraph-body-s-font-style);
+}
+
+.toast-a-screen .hint-wrap-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0px 12px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  background-color: var(--color-palettes-white-o15);
+}
+
+.toast-a-screen .hint-2 {
+  display: inline-flex;
+  height: 24px;
+  align-items: center;
+  gap: var(--space-scale-space-xxs);
+  position: relative;
+  border-radius: 50px;
+}
+
+.toast-a-screen .hint-3 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1.00px;
+  font-family: var(--label-label-s-bold-font-family);
+  font-weight: var(--label-label-s-bold-font-weight);
+  color: var(--color-semantic-text-normal);
+  font-size: var(--label-label-s-bold-font-size);
+  text-align: center;
+  letter-spacing: var(--label-label-s-bold-letter-spacing);
+  line-height: var(--label-label-s-bold-line-height);
+  white-space: nowrap;
+  font-style: var(--label-label-s-bold-font-style);
+}

@@ -1,0 +1,192 @@
+.toast-a {
+  width: 1920px;
+  height: 1080px;
+  background-color: var(--color-semantic-bg-view-backdrop-solid);
+  overflow: hidden;
+}
+
+.toast-a .notification {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  width: 600px;
+  align-items: center;
+  position: relative;
+  top: 64px;
+  left: 1980px;
+  background-color: var(--color-palettes-black-o98);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid;
+  border-color: var(--color-palettes-neutral-lighter);
+  box-shadow: 0px 48px 96px #00000054;
+}
+
+.toast-a .information {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.toast-a .notification-image {
+  display: inline-flex;
+  align-items: flex-start;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.toast-a .programs {
+  position: relative;
+  width: 112px;
+  height: 64px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.toast-a .b-ad {
+  position: absolute;
+  width: 112px;
+  height: 64px;
+  top: 8401px;
+  left: -50395px;
+  object-fit: cover;
+}
+
+.toast-a .text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 16px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.toast-a .primary-text {
+  position: relative;
+  align-self: stretch;
+  margin-top: -1.00px;
+  font-family: var(--interactive-interactive-s-font-family);
+  font-weight: var(--interactive-interactive-s-font-weight);
+  color: var(--color-semantic-text-normal);
+  font-size: var(--interactive-interactive-s-font-size);
+  letter-spacing: var(--interactive-interactive-s-letter-spacing);
+  line-height: var(--interactive-interactive-s-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-style: var(--interactive-interactive-s-font-style);
+}
+
+.toast-a .secondary-text {
+  position: relative;
+  align-self: stretch;
+  height: 30px;
+  font-family: var(--body-paragraph-body-s-font-family);
+  font-weight: var(--body-paragraph-body-s-font-weight);
+  color: var(--color-semantic-text-subtle);
+  font-size: var(--body-paragraph-body-s-font-size);
+  letter-spacing: var(--body-paragraph-body-s-letter-spacing);
+  line-height: var(--body-paragraph-body-s-line-height);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  font-style: var(--body-paragraph-body-s-font-style);
+}
+
+.toast-a .hint-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0px 12px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  background-color: var(--color-palettes-white-o15);
+}
+
+.toast-a .hint {
+  display: inline-flex;
+  height: 24px;
+  align-items: center;
+  gap: var(--space-scale-space-xxs);
+  position: relative;
+  border-radius: 50px;
+}
+
+.toast-a .text-wrapper {
+  position: relative;
+  width: fit-content;
+  margin-top: -1.00px;
+  font-family: var(--label-label-s-bold-font-family);
+  font-weight: var(--label-label-s-bold-font-weight);
+  color: var(--color-semantic-text-normal);
+  font-size: var(--label-label-s-bold-font-size);
+  text-align: center;
+  letter-spacing: var(--label-label-s-bold-letter-spacing);
+  line-height: var(--label-label-s-bold-line-height);
+  white-space: nowrap;
+  font-style: var(--label-label-s-bold-font-style);
+}
+/* Original CSS code should be injected here */
+
+/* Additional styles for semantic HTML improvements */
+.toast-a .notification-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0;
+}
+
+.toast-a .notification {
+  position: relative;
+  z-index: 2;
+}
+
+.toast-a .hint[role="button"] {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.toast-a .hint[role="button"]:hover {
+  opacity: 0.8;
+}
+
+.toast-a .hint[role="button"]:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Ensure proper focus management */
+.toast-a:focus-within .notification {
+  border-color: var(--color-palettes-neutral-lightest);
+}

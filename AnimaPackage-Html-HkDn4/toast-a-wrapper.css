@@ -1,0 +1,136 @@
+.toast-a-wrapper {
+  width: 1920px;
+  height: 1080px;
+  background-color: var(--color-semantic-bg-view-backdrop-solid);
+}
+
+.toast-a-wrapper .notification-2 {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  width: 600px;
+  align-items: center;
+  position: relative;
+  top: 64px;
+  left: 1260px;
+  background-color: var(--color-palettes-black-o98);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid;
+  border-color: var(--color-palettes-neutral-lighter);
+  box-shadow: 0px 48px 96px #00000054;
+}
+
+.toast-a-wrapper .information-3 {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.toast-a-wrapper .div-wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  padding: 4px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.toast-a-wrapper .programs-2 {
+  position: relative;
+  width: 112px;
+  height: 64px;
+  border-radius: 4px;
+  background-image: url(./img/p186291-b-h10-ad-3.png);
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+.toast-a-wrapper .text-3 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 16px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.toast-a-wrapper .primary-text-3 {
+  position: relative;
+  align-self: stretch;
+  margin-top: -1.00px;
+  font-family: var(--interactive-interactive-s-font-family);
+  font-weight: var(--interactive-interactive-s-font-weight);
+  color: var(--color-semantic-text-normal);
+  font-size: var(--interactive-interactive-s-font-size);
+  letter-spacing: var(--interactive-interactive-s-letter-spacing);
+  line-height: var(--interactive-interactive-s-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-style: var(--interactive-interactive-s-font-style);
+}
+
+.toast-a-wrapper .secondary-text-3 {
+  position: relative;
+  align-self: stretch;
+  height: 30px;
+  font-family: var(--body-paragraph-body-s-font-family);
+  font-weight: var(--body-paragraph-body-s-font-weight);
+  color: var(--color-semantic-text-subtle);
+  font-size: var(--body-paragraph-body-s-font-size);
+  letter-spacing: var(--body-paragraph-body-s-letter-spacing);
+  line-height: var(--body-paragraph-body-s-line-height);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  font-style: var(--body-paragraph-body-s-font-style);
+}
+
+.toast-a-wrapper .hint-wrap-3 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0px 12px;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  background-color: var(--color-palettes-white-o15);
+}
+
+.toast-a-wrapper .hint-4 {
+  display: inline-flex;
+  height: 24px;
+  align-items: center;
+  gap: var(--space-scale-space-xxs);
+  position: relative;
+  border-radius: 50px;
+}
+
+.toast-a-wrapper .hint-5 {
+  position: relative;
+  width: fit-content;
+  margin-top: -1.00px;
+  font-family: var(--label-label-s-bold-font-family);
+  font-weight: var(--label-label-s-bold-font-weight);
+  color: var(--color-semantic-text-normal);
+  font-size: var(--label-label-s-bold-font-size);
+  text-align: center;
+  letter-spacing: var(--label-label-s-bold-letter-spacing);
+  line-height: var(--label-label-s-bold-line-height);
+  white-space: nowrap;
+  font-style: var(--label-label-s-bold-font-style);
+}
