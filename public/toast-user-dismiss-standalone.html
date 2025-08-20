@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Fubo TV - Toast: User Dismiss (Standalone)</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			background: #000;
+			color: #fff;
+			overflow: hidden;
+			height: 100vh;
+		}
+		
+		.toast-user-dismiss-container {
+			width: 100vw;
+			height: 100vh;
+			position: relative;
+		}
+		
+		#bg-video {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			min-width: 100%;
+			min-height: 100%;
+			width: auto;
+			height: auto;
+			z-index: 1;
+			transform: translateX(-50%) translateY(-50%);
+			background-size: cover;
+		}
+		
+		.loading {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			text-align: center;
+			z-index: 10;
+			background: rgba(0,0,0,0.8);
+			padding: 40px;
+			border-radius: 12px;
+			min-width: 300px;
+		}
+		
+		.loading.hidden {
+			display: none;
+		}
+		
+		.loading-bar {
+			width: 100%;
+			height: 8px;
+			background: rgba(255,255,255,0.2);
+			border-radius: 4px;
+			overflow: hidden;
+			margin: 20px 0;
+		}
+		
+		.loading-progress {
+			height: 100%;
+			background: linear-gradient(90deg, #00d084, #00b874);
+			width: 0%;
+			transition: width 0.3s ease;
+			border-radius: 4px;
+		}
+
+		.loading-cta {
+			margin-top: 20px;
+			padding: 12px 24px;
+			background: #00d084;
+			color: #00130d;
+			border: none;
+			border-radius: 6px;
+			font-weight: 600;
+			cursor: pointer;
+			font-size: 16px;
+			transition: background 0.3s;
+		}
+
+		.loading-cta:hover {
+			background: #00b874;
+		}
+
+		.loading-cta[disabled] {
+			background: #666;
+			color: #bbb;
+			cursor: not-allowed;
+			opacity: 0.6;
+		}
+
+		.loading-status {
+			margin-top: 10px;
+			font-size: 14px;
+			opacity: 0.8;
+		}
+
+		.instructions {
+			margin-top: 15px;
+			font-size: 14px;
+			opacity: 0.85;
+			line-height: 1.4;
+		}
+
+		/* Toast Notification Styles */
+		.toast-notification {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			background: rgba(0, 0, 0, 0.95);
+			border: 2px solid #00d084;
+			border-radius: 12px;
+			padding: 20px;
+			max-width: 400px;
+			z-index: 1000;
+			transform: translateX(100%);
+			transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+			box-shadow: 0 8px 32px rgba(0, 208, 132, 0.3);
+		}
+
+		.toast-notification.show {
+			transform: translateX(0);
+		}
+
+		.toast-notification.hide {
+			transform: translateX(100%);
+		}
+
+		.toast-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 15px;
+		}
+
+		.toast-title {
+			font-size: 18px;
+			font-weight: 600;
+			color: #00d084;
+		}
+
+		.toast-close {
+			background: none;
+			border: none;
+			color: #666;
+			font-size: 20px;
+			cursor: pointer;
+			padding: 0;
+			width: 24px;
+			height: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			transition: all 0.3s;
+		}
+
+		.toast-close:hover {
+			background: rgba(255, 255, 255, 0.1);
+			color: #fff;
+		}
+
+		.toast-content {
+			margin-bottom: 20px;
+			line-height: 1.5;
+		}
+
+		.toast-actions {
+			display: flex;
+			gap: 10px;
+		}
+
+		.toast-btn {
+			padding: 10px 20px;
+			border: none;
+			border-radius: 6px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s;
+			font-size: 14px;
+		}
+
+		.toast-btn.primary {
+			background: #00d084;
+			color: #00130d;
+		}
+
+		.toast-btn.primary:hover {
+			background: #00b874;
+		}
+
+		.toast-btn.secondary {
+			background: transparent;
+			color: #fff;
+			border: 1px solid #666;
+		}
+
+		.toast-btn.secondary:hover {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: #999;
+		}
+
+		/* Game content area */
+		.game-content {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			text-align: center;
+			z-index: 5;
+			background: rgba(0, 0, 0, 0.8);
+			padding: 40px;
+			border-radius: 16px;
+			border: 2px solid #00d084;
+			max-width: 600px;
+		}
+
+		.game-title {
+			font-size: 32px;
+			font-weight: 700;
+			color: #00d084;
+			margin-bottom: 20px;
+		}
+
+		.game-description {
+			font-size: 18px;
+			line-height: 1.6;
+			margin-bottom: 30px;
+			opacity: 0.9;
+		}
+
+		.game-stats {
+			display: flex;
+			justify-content: space-around;
+			margin-bottom: 30px;
+		}
+
+		.stat-item {
+			text-align: center;
+		}
+
+		.stat-value {
+			font-size: 24px;
+			font-weight: 600;
+			color: #00d084;
+		}
+
+		.stat-label {
+			font-size: 14px;
+			opacity: 0.7;
+			margin-top: 5px;
+		}
+
+		/* Keyboard hint */
+		.keyboard-hint {
+			position: fixed;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			background: rgba(0, 0, 0, 0.8);
+			padding: 10px 20px;
+			border-radius: 8px;
+			font-size: 14px;
+			opacity: 0.7;
+			z-index: 100;
+		}
+	</style>
+</head>
+<body>
+	<div class="toast-user-dismiss-container">
+		<div id="loading" class="loading">
+			<div>Loading Toast: User Dismiss...</div>
+			<div class="loading-bar">
+				<div id="loading-progress" class="loading-progress"></div>
+			</div>
+			<div id="loading-status" class="loading-status">Initializing...</div>
+			<div class="instructions">When the prompt appears, you can press <strong>Enter</strong> to use the CTA.</div>
+			<button id="begin-btn" class="loading-cta" disabled>Click to begin</button>
+		</div>
+
+		<video autoplay muted loop id="bg-video">
+			<source src="/NotifProtoVid_1.mp4?v=1" type="video/mp4">
+		</video>
+		
+
+
+		<!-- Toast Notification -->
+		<div id="toast-notification" class="toast-notification">
+			<div class="toast-header">
+				<div class="toast-title">🎉 Special Offer!</div>
+				<button class="toast-close" id="toast-close">×</button>
+			</div>
+			<div class="toast-content">
+				Get 50% off your first month of Fubo TV Premium! 
+				Access exclusive sports content and never miss a game.
+			</div>
+			<div class="toast-actions">
+				<button class="toast-btn primary" id="toast-cta">Get Started</button>
+				<button class="toast-btn secondary" id="toast-dismiss">Maybe Later</button>
+			</div>
+		</div>
+
+		<!-- Keyboard hint -->
+		<div class="keyboard-hint">
+			💡 Press <strong>Enter</strong> to use the CTA button
+		</div>
+	</div>
+
+	<script>
+		const loading = document.getElementById('loading');
+		const beginBtn = document.getElementById('begin-btn');
+		const loadingStatus = document.getElementById('loading-status');
+		const loadingProgress = document.getElementById('loading-progress');
+		const gameContent = document.getElementById('game-content');
+		const toastNotification = document.getElementById('toast-notification');
+		const toastClose = document.getElementById('toast-close');
+		const toastCta = document.getElementById('toast-cta');
+		const toastDismiss = document.getElementById('toast-dismiss');
+		
+		// Progressive loading simulation
+		let progress = 0;
+		const progressInterval = setInterval(() => {
+			progress += Math.random() * 15;
+			if (progress >= 100) {
+				progress = 100;
+				clearInterval(progressInterval);
+				beginBtn.disabled = false;
+				loadingStatus.textContent = 'Ready to start!';
+			}
+			loadingProgress.style.width = progress + '%';
+			loadingStatus.textContent = `Loading... ${Math.round(progress)}%`;
+		}, 200);
+
+		// Start prototype when button is clicked
+		beginBtn.addEventListener('click', () => {
+			beginBtn.disabled = true;
+			beginBtn.textContent = 'Starting...';
+			
+			// Hide loading screen
+			setTimeout(() => {
+				loading.classList.add('hidden');
+				gameContent.style.display = 'block';
+				
+				// Show toast notification after 3 seconds
+				setTimeout(() => {
+					showToast();
+				}, 3000);
+			}, 1000);
+		});
+
+		// Toast notification functions
+		function showToast() {
+			toastNotification.classList.add('show');
+		}
+
+		function hideToast() {
+			toastNotification.classList.add('hide');
+			setTimeout(() => {
+				toastNotification.classList.remove('show', 'hide');
+			}, 500);
+		}
+
+		// Event listeners
+		toastClose.addEventListener('click', hideToast);
+		toastDismiss.addEventListener('click', hideToast);
+		toastCta.addEventListener('click', () => {
+			alert('🎉 Welcome to Fubo TV Premium! Redirecting to signup...');
+			hideToast();
+		});
+
+		// Keyboard support for Enter key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' && toastNotification.classList.contains('show')) {
+				toastCta.click();
+			}
+		});
+	</script>
+</body>
+</html>
