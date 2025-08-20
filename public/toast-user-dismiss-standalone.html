@@ -318,7 +318,7 @@
 		const beginBtn = document.getElementById('begin-btn');
 		const loadingStatus = document.getElementById('loading-status');
 		const loadingProgress = document.getElementById('loading-progress');
-		const gameContent = document.getElementById('game-content');
+
 		const toastNotification = document.getElementById('toast-notification');
 		const toastClose = document.getElementById('toast-close');
 		const toastCta = document.getElementById('toast-cta');
@@ -346,7 +346,7 @@
 			// Hide loading screen
 			setTimeout(() => {
 				loading.classList.add('hidden');
-				gameContent.style.display = 'block';
+
 				
 				// Show toast notification after 3 seconds
 				setTimeout(() => {

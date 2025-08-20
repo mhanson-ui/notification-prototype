@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Fubo TV - Toast: Auto-dismiss (Standalone)</title>
+	<title>Fubo TV - Ribbon: User Dismiss (Standalone)</title>
 	<style>
 		* {
 			margin: 0;
@@ -19,7 +19,7 @@
 			height: 100vh;
 		}
 		
-		.toast-auto-dismiss-container {
+		.ribbon-user-dismiss-container {
 			width: 100vw;
 			height: 100vh;
 			position: relative;
@@ -109,77 +109,69 @@
 			line-height: 1.4;
 		}
 
-		/* Toast Notification Styles */
-		.toast-notification {
+		/* Ribbon Notification Styles */
+		.ribbon-notification {
 			position: fixed;
-			top: 20px;
-			right: 20px;
-			background: rgba(0, 0, 0, 0.95);
-			border: 2px solid #00d084;
-			border-radius: 12px;
-			padding: 20px;
-			max-width: 400px;
+			top: 0;
+			left: 0;
+			right: 0;
+			background: linear-gradient(135deg, #00d084, #00b874);
+			color: #00130d;
+			padding: 16px 20px;
 			z-index: 1000;
-			transform: translateX(100%);
+			transform: translateY(-100%);
 			transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-			box-shadow: 0 8px 32px rgba(0, 208, 132, 0.3);
+			box-shadow: 0 4px 20px rgba(0, 208, 132, 0.4);
 		}
 
-		.toast-notification.show {
-			transform: translateX(0);
+		.ribbon-notification.show {
+			transform: translateY(0);
 		}
 
-		.toast-notification.hide {
-			transform: translateX(100%);
+		.ribbon-notification.hide {
+			transform: translateY(-100%);
 		}
 
-		.toast-header {
+		.ribbon-content {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			margin-bottom: 15px;
+			max-width: 1200px;
+			margin: 0 auto;
 		}
 
-		.toast-title {
-			font-size: 18px;
-			font-weight: 600;
-			color: #00d084;
+		.ribbon-left {
+			display: flex;
+			align-items: center;
+			gap: 15px;
 		}
 
-		.toast-close {
-			background: none;
-			border: none;
-			color: #666;
-			font-size: 20px;
-			cursor: pointer;
-			padding: 0;
-			width: 24px;
-			height: 24px;
+		.ribbon-icon {
+			font-size: 24px;
+			background: rgba(255, 255, 255, 0.2);
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			border-radius: 50%;
-			transition: all 0.3s;
 		}
 
-		.toast-close:hover {
-			background: rgba(255, 255, 255, 0.1);
-			color: #fff;
+		.ribbon-text {
+			font-size: 16px;
+			font-weight: 600;
 		}
 
-		.toast-content {
-			margin-bottom: 20px;
-			line-height: 1.5;
-		}
-
-		.toast-actions {
+		.ribbon-actions {
 			display: flex;
-			gap: 10px;
+			gap: 12px;
 		}
 
-		.toast-btn {
-			padding: 10px 20px;
-			border: none;
+		.ribbon-btn {
+			padding: 8px 16px;
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			background: transparent;
+			color: #00130d;
 			border-radius: 6px;
 			font-weight: 600;
 			cursor: pointer;
@@ -187,74 +179,70 @@
 			font-size: 14px;
 		}
 
-		.toast-btn.primary {
-			background: #00d084;
-			color: #00130d;
+		.ribbon-btn:hover {
+			background: rgba(255, 255, 255, 0.2);
+			border-color: rgba(255, 255, 255, 0.5);
 		}
 
-		.toast-btn.primary:hover {
-			background: #00b874;
+		.ribbon-btn.primary {
+			background: rgba(255, 255, 255, 0.9);
+			border-color: rgba(255, 255, 255, 0.9);
 		}
 
-		.toast-btn.secondary {
-			background: transparent;
-			color: #fff;
-			border: 1px solid #666;
+		.ribbon-btn.primary:hover {
+			background: rgba(255, 255, 255, 1);
 		}
 
-		.toast-btn.secondary:hover {
-			background: rgba(255, 255, 255, 0.1);
-			border-color: #999;
+		/* Keyboard hint */
+		.keyboard-hint {
+			position: fixed;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			background: rgba(0, 0, 0, 0.8);
+			padding: 10px 20px;
+			border-radius: 8px;
+			font-size: 14px;
+			opacity: 0.7;
+			z-index: 100;
 		}
-
-		/* Auto-dismiss progress bar */
-		.toast-progress {
-			position: absolute;
-			bottom: 0;
-			left: 0;
-			height: 3px;
-			background: #00d084;
-			width: 100%;
-			transform-origin: left;
-			transition: transform 0.1s linear;
-		}
-
-
 	</style>
 </head>
 <body>
-	<div class="toast-auto-dismiss-container">
+	<div class="ribbon-user-dismiss-container">
 		<div id="loading" class="loading">
-			<div>Loading Toast: Auto-dismiss...</div>
+			<div>Loading Ribbon: User Dismiss...</div>
 			<div class="loading-bar">
 				<div id="loading-progress" class="loading-progress"></div>
 			</div>
 			<div id="loading-status" class="loading-status">Initializing...</div>
-			<div class="instructions">This variant auto-dismisses; no input required.</div>
+			<div class="instructions">When the prompt appears, you can press <strong>Enter</strong> to use the CTA.</div>
 			<button id="begin-btn" class="loading-cta" disabled>Click to begin</button>
 		</div>
 
 		<video autoplay muted loop id="bg-video">
 			<source src="/NotifProtoVid_1.mp4?v=1" type="video/mp4">
 		</video>
-		
 
+		<!-- Ribbon Notification -->
+		<div id="ribbon-notification" class="ribbon-notification">
+			<div class="ribbon-content">
+				<div class="ribbon-left">
+					<div class="ribbon-icon">🎉</div>
+					<div class="ribbon-text">
+						Limited Time: Get 50% off Fubo TV Premium + Free DVR!
+					</div>
+				</div>
+				<div class="ribbon-actions">
+					<button class="ribbon-btn secondary" id="ribbon-dismiss">Dismiss</button>
+					<button class="ribbon-btn primary" id="ribbon-cta">Get Offer</button>
+				</div>
+			</div>
+		</div>
 
-		<!-- Toast Notification -->
-		<div id="toast-notification" class="toast-notification">
-			<div class="toast-progress" id="toast-progress"></div>
-			<div class="toast-header">
-				<div class="toast-title">🎉 Special Offer!</div>
-				<button class="toast-close" id="toast-close">×</button>
-			</div>
-			<div class="game-content">
-				Get 50% off your first month of Fubo TV Premium! 
-				Access exclusive sports content and never miss a game.
-			</div>
-			<div class="toast-actions">
-				<button class="toast-btn primary" id="toast-cta">Get Started</button>
-				<button class="toast-btn secondary" id="toast-dismiss">Maybe Later</button>
-			</div>
+		<!-- Keyboard hint -->
+		<div class="keyboard-hint">
+			💡 Press <strong>Enter</strong> to use the CTA button
 		</div>
 	</div>
 
@@ -263,12 +251,9 @@
 		const beginBtn = document.getElementById('begin-btn');
 		const loadingStatus = document.getElementById('loading-status');
 		const loadingProgress = document.getElementById('loading-progress');
-
-		const toastNotification = document.getElementById('toast-notification');
-		const toastProgress = document.getElementById('toast-progress');
-		const toastClose = document.getElementById('toast-close');
-		const toastCta = document.getElementById('toast-cta');
-		const toastDismiss = document.getElementById('toast-dismiss');
+		const ribbonNotification = document.getElementById('ribbon-notification');
+		const ribbonCta = document.getElementById('ribbon-cta');
+		const ribbonDismiss = document.getElementById('ribbon-dismiss');
 		
 		// Progressive loading simulation
 		let progress = 0;
@@ -292,54 +277,38 @@
 			// Hide loading screen
 			setTimeout(() => {
 				loading.classList.add('hidden');
-
 				
-				// Show toast notification after 3 seconds
+				// Show ribbon notification after 3 seconds
 				setTimeout(() => {
-					showToast();
+					showRibbon();
 				}, 3000);
 			}, 1000);
 		});
 
-		// Toast notification functions
-		function showToast() {
-			toastNotification.classList.add('show');
-			startAutoDismiss();
+		// Ribbon notification functions
+		function showRibbon() {
+			ribbonNotification.classList.add('show');
 		}
 
-		function hideToast() {
-			toastNotification.classList.add('hide');
+		function hideRibbon() {
+			ribbonNotification.classList.add('hide');
 			setTimeout(() => {
-				toastNotification.classList.remove('show', 'hide');
+				ribbonNotification.classList.remove('show', 'hide');
 			}, 500);
 		}
 
-		function startAutoDismiss() {
-			const duration = 8000; // 8 seconds
-			const startTime = Date.now();
-			
-			function updateProgress() {
-				const elapsed = Date.now() - startTime;
-				const progress = Math.max(0, 1 - (elapsed / duration));
-				
-				toastProgress.style.transform = `scaleX(${progress})`;
-				
-				if (progress > 0) {
-					requestAnimationFrame(updateProgress);
-				} else {
-					hideToast();
-				}
-			}
-			
-			updateProgress();
-		}
-
 		// Event listeners
-		toastClose.addEventListener('click', hideToast);
-		toastDismiss.addEventListener('click', hideToast);
-		toastCta.addEventListener('click', () => {
+		ribbonDismiss.addEventListener('click', hideRibbon);
+		ribbonCta.addEventListener('click', () => {
 			alert('🎉 Welcome to Fubo TV Premium! Redirecting to signup...');
-			hideToast();
+			hideRibbon();
+		});
+
+		// Keyboard support for Enter key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' && ribbonNotification.classList.contains('show')) {
+				ribbonCta.click();
+			}
 		});
 	</script>
 </body>

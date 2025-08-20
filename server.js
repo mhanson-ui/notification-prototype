@@ -98,21 +98,21 @@ app.get('/promo-delay', (req, res) => {
     });
 });
 
-// Railway deployment routes - direct access to specific Figma states
+// Railway deployment routes - direct access to standalone prototypes
 app.get('/toast-user-dismiss', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'toast-user-dismiss.html'));
+    res.sendFile(path.join(__dirname, 'public', 'toast-user-dismiss-standalone.html'));
 });
 
 app.get('/toast-auto-dismiss', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'toast-auto-dismiss.html'));
+    res.sendFile(path.join(__dirname, 'public', 'toast-auto-dismiss-standalone.html'));
 });
 
 app.get('/ribbon-user-dismiss', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'ribbon-user-dismiss.html'));
+    res.sendFile(path.join(__dirname, 'public', 'ribbon-user-dismiss-standalone.html'));
 });
 
 app.get('/ribbon-auto-dismiss', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'ribbon-auto-dismiss.html'));
+    res.sendFile(path.join(__dirname, 'public', 'ribbon-auto-dismiss-standalone.html'));
 });
 
 function getContextualPromoType() {

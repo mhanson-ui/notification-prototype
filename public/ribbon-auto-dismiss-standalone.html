@@ -298,7 +298,7 @@
 		const beginBtn = document.getElementById('begin-btn');
 		const loadingStatus = document.getElementById('loading-status');
 		const loadingProgress = document.getElementById('loading-progress');
-		const gameContent = document.getElementById('game-content');
+
 		const ribbonNotification = document.getElementById('ribbon-notification');
 		const ribbonProgress = document.getElementById('ribbon-progress');
 		const ribbonCta = document.getElementById('ribbon-cta');
@@ -326,7 +326,7 @@
 			// Hide loading screen
 			setTimeout(() => {
 				loading.classList.add('hidden');
-				gameContent.style.display = 'block';
+
 				
 				// Show ribbon notification after 3 seconds
 				setTimeout(() => {
