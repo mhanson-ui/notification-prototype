@@ -113,13 +113,15 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			display: none;
 		}
 		
 		iframe { 
 			width: 100%; 
 			height: 100%; 
-			border: none; 
+			border: none;
+			background: transparent;
+			position: relative;
+			z-index: 2;
 		}
 		
 		.enter-hint {
@@ -166,203 +168,37 @@
 	
 	<!-- TV Screen -->
 	<div id="tv-screen" class="tv-screen">
+		<video autoplay muted loop id="bg-video"></video>
 		<iframe id="figma-embed" src="" tabindex="0"></iframe>
 		<div id="enter-hint" class="enter-hint">Press ENTER to dismiss</div>
 	</div>
 
 	<script src="/socket.io/socket.io.js"></script>
-		<script>
+	<script>
 		const socket = io({ transports: ['websocket'], upgrade: false });
 		const figmaFrame = document.getElementById('figma-embed');
 		const loadingScreen = document.getElementById('loading-screen');
 		const tvScreen = document.getElementById('tv-screen');
-		const loadingBar = document.getElementById('loading-bar');
-		const loadingStatus = document.getElementById('loading-status');
-		const enterHint = document.getElementById('enter-hint');
 		const beginBtn = document.getElementById('begin-btn');
-		const stepStatus = document.getElementById('step-status');
-		function setPhase(phase) {
-			if (phase === 'preloading') stepStatus.textContent = 'Step 1/3: Preloading…';
-			if (phase === 'ready') stepStatus.textContent = 'Step 2/3: Ready – click Begin to start';
-			if (phase === 'starting') stepStatus.textContent = 'Step 3/3: Starting…';
-			if (phase === 'playing') stepStatus.textContent = 'Playing';
-		}
+		const video = document.getElementById('bg-video');
 
-		// Figma prototype links
-		const figmaLinks = {
-			'game_playing': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4465-39526&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4465%3A39526&show-proto-sidebar=1",
-			'sports_promo_focus_watchnow': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4482-207&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4482%3A207&show-proto-sidebar=1",
-			'sports_promo_focus_dismiss': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4414-39703&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4414%3A39703&show-proto-sidebar=1",
-			'primetime_promo_focus_watchnow': "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4414-39748&p=f&viewport=-1126%2C170%2C0.03&t=22e0SnBuCfLrC63X-9&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4414%3A39748&show-proto-sidebar=1"
-		};
-
-		let currentState = 'game_playing';
-		let warmedGameFrame = null;
-
-		// Convert Figma URLs to embed URLs
+		const figmaUrl = "https://www.figma.com/proto/MS5xgxLvmO3WCl40DKu89g/Yan-s-Sandbox?page-id=4337%3A33308&node-id=4465-39526&p=f&viewport=-1165%2C199%2C0.03&t=d5eqcn3KNhT00hrg-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4465%3A39526";
+		
 		function toEmbedUrl(url, autoplay = 1) {
 			if (!url) return '';
-			if (url.includes('embed.figma.com')) return url;
 			const encoded = encodeURIComponent(url);
-			// Fullscreen, no UI, optimized for TV experience
 			return `https://www.figma.com/embed?embed_host=notion&hotspot-hints=0&hide-ui=1&autoplay=${autoplay}&url=${encoded}`;
 		}
 
-		// Preload all Figma content for zero latency - sequential to avoid WebGL context issues
-		async function preloadContent() {
-			const states = Object.keys(figmaLinks);
-			let loadedCount = 0;
-			
-			// Create a container for preload iframes
-			const preloadContainer = document.createElement('div');
-			preloadContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
-			document.body.appendChild(preloadContainer);
-			window.__preloadContainer = preloadContainer;
-			
-			// Preload states sequentially to avoid overwhelming WebGL contexts
-			async function preloadNext(index) {
-				if (index >= states.length) {
-					// All content preloaded, enable CTA
-					loadingStatus.textContent = 'All content ready! Click begin to start';
-					beginBtn.disabled = false;
-					setPhase('ready');
-					// Don't remove preload container yet if we preserved the warmed frame
-					return;
-				}
-				
-				const state = states[index];
-				loadingStatus.textContent = `Preloading ${state.replace(/_/g, ' ')}...`;
-				loadingBar.style.width = `${(index / states.length) * 100}%`;
-				
-				// Create hidden iframe to preload content
-				const preloadFrame = document.createElement('iframe');
-				preloadFrame.style.cssText = 'width:100px;height:100px;border:none;';
-				preloadFrame.src = toEmbedUrl(figmaLinks[state], 0);
-				
-				// Wait for iframe to load, then move to next
-				preloadFrame.onload = () => {
-					// Wait for Figma to render, then preload next state
-					setTimeout(() => {
-						loadedCount++;
-						loadingBar.style.width = `${(loadedCount / states.length) * 100}%`;
-						loadingStatus.textContent = `Preloaded ${loadedCount}/${states.length} states...`;
-						
-						if (state === 'game_playing') {
-							warmedGameFrame = preloadFrame;
-						} else {
-							preloadFrame.remove();
-						}
-						
-						// Preload next state
-						preloadNext(index + 1);
-					}, 2000); // Extra render buffer for zero-latency
-				};
-				
-				preloadContainer.appendChild(preloadFrame);
-			}
-			
-			// Start sequential preloading
-			preloadNext(0);
-		}
-
-		// Show TV screen and start experience after user click; keep overlay until iframe signals ready
 		function showTVScreen() {
-			// Keep the loading overlay visible while the main iframe is initializing
 			tvScreen.style.display = 'block';
-			loadingStatus.textContent = 'Starting...';
-			
-			currentState = 'game_playing';
-			// If we have a warmed game frame, swap it in instantly
-			if (warmedGameFrame) {
-				try {
-					warmedGameFrame.removeAttribute('style');
-					warmedGameFrame.id = 'figma-embed';
-					warmedGameFrame.setAttribute('tabindex', '0');
-					document.getElementById('tv-screen').replaceChild(warmedGameFrame, figmaFrame);
-					loadingScreen.style.display = 'none';
-					setPhase('playing');
-					setTimeout(() => {
-						try { warmedGameFrame.focus(); warmedGameFrame.contentWindow && warmedGameFrame.contentWindow.focus(); } catch (e) {}
-					}, 0);
-					// Clean up hidden container if present
-					if (window.__preloadContainer) {
-						try { window.__preloadContainer.remove(); } catch (e) {}
-					}
-					warmedGameFrame = null;
-					return;
-				} catch (e) {
-					console.warn('Swap failed; falling back to normal load', e);
-				}
-			}
-			
-			// Fallback: set src and wait for onload (overlay remains until ready)
-			figmaFrame.src = toEmbedUrl(figmaLinks['game_playing']);
-			
-			let loaded = false;
-			const readyTimeout = setTimeout(() => {
-				if (!loaded) {
-					loadingStatus.textContent = 'Almost there...';
-				}
-			}, 2500);
-			
-			figmaFrame.onload = () => {
-				loaded = true;
-				clearTimeout(readyTimeout);
-				loadingScreen.style.display = 'none';
-				// Ensure iframe receives keyboard focus so Enter works without extra click
-				setTimeout(() => {
-					try { figmaFrame.focus(); figmaFrame.contentWindow && figmaFrame.contentWindow.focus(); } catch (e) {}
-				}, 0);
-				setPhase('playing');
-				console.log('Main iframe loaded, letting Figma prototype control the flow...');
-			};
+			loadingScreen.style.display = 'none';
+			video.src = "/NotifProtoVid_1.mp4";
+			figmaFrame.src = toEmbedUrl(figmaUrl);
 		}
 
-		// We no longer control state changes - Figma prototype handles its own flow
-		// This function is kept for testing purposes only
-		function changeState(newState) {
-			if (figmaLinks[newState]) {
-				currentState = newState;
-				figmaFrame.src = toEmbedUrl(figmaLinks[newState]);
-			}
-		}
+		beginBtn.addEventListener('click', showTVScreen);
 
-		// Handle Enter key for dismissal - only when Figma shows action prompt
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter') {
-				// Let Figma prototype handle the Enter key action
-				// We're just providing the input method, not controlling the flow
-				console.log('Enter key pressed - Figma prototype will handle the action');
-			}
-		});
-
-		// Socket events for testing
-		socket.on('show-promo', (data) => {
-			if (data.promoType === 'sports_promo') {
-				changeState('sports_promo_focus_watchnow');
-			} else if (data.promoType === 'primetime_promo') {
-				changeState('primetime_promo_focus_watchnow');
-			}
-		});
-
-		socket.on('reset-to-game', () => {
-			changeState('game_playing');
-		});
-
-		// Wire CTA to start once preloaded
-		// Show CTA immediately but disabled until preload completes
-		beginBtn.disabled = true;
-		beginBtn.addEventListener('click', () => {
-			beginBtn.disabled = true;
-			beginBtn.textContent = 'Loading...';
-			setPhase('starting');
-			showTVScreen();
-		});
-
-		// Start preloading content
-		console.log('Starting content preload...');
-		setPhase('preloading');
-		preloadContent();
 	</script>
 </body>
 </html>
