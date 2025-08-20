@@ -22,7 +22,44 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 // Serve TV screen by default at root
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'tv.html'));
+	res.send(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title>Fubo TV Prototypes</title>
+			<style>
+				body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; background: #000; color: #fff; }
+				.container { max-width: 800px; margin: 0 auto; }
+				h1 { color: #00d084; margin-bottom: 30px; }
+				.prototype-link { display: block; margin: 20px 0; padding: 20px; background: #1a1a1a; border-radius: 8px; text-decoration: none; color: #fff; transition: background 0.3s; }
+				.prototype-link:hover { background: #2a2a2a; }
+				.prototype-link h3 { margin: 0 0 10px 0; color: #00d084; }
+				.prototype-link p { margin: 0; opacity: 0.8; }
+			</style>
+		</head>
+		<body>
+			<div class="container">
+				<h1>🎬 Fubo TV Prototypes</h1>
+				<a href="/toast-user-dismiss" class="prototype-link">
+					<h3>Toast: User Dismiss</h3>
+					<p>Interactive toast notification that requires user input to dismiss</p>
+				</a>
+				<a href="/toast-auto-dismiss" class="prototype-link">
+					<h3>Toast: Auto-dismiss</h3>
+					<p>Toast notification that automatically dismisses after a set time</p>
+				</a>
+				<a href="/ribbon-user-dismiss" class="prototype-link">
+					<h3>Ribbon: User Dismiss</h3>
+					<p>Ribbon notification requiring user interaction to dismiss</p>
+				</a>
+				<a href="/ribbon-auto-dismiss" class="prototype-link">
+					<h3>Ribbon: Auto-dismiss</h3>
+					<p>Ribbon notification that automatically dismisses</p>
+				</a>
+			</div>
+		</body>
+		</html>
+	`);
 });
 
 // Simple health check for connectivity tests
